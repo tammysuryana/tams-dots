@@ -1,0 +1,37 @@
+# Tema GRUB "tams-dots" (turunan cachyos-grub-theme, GPL-3.0; logo Arch Linux)
+title-text: ""
+desktop-image: "background.png"
+desktop-color: "#0b0f18"
+terminal-font: "Terminus Regular 18"
+terminal-left: "0"
+terminal-top: "0"
+terminal-width: "100%"
+terminal-height: "100%"
+terminal-border: "0"
+
++ boot_menu {
+  left = 15%
+  top = 40%
+  width = 70%
+  height = 55%
+  item_font = "Ubuntu Regular 20"
+  item_color = "#8b95a7"
+  selected_item_color = "#ffffff"
+  icon_width = 36
+  icon_height = 36
+  item_icon_space = 16
+  item_height = 40
+  item_padding = 2
+  item_spacing = 10
+  selected_item_pixmap_style = "select_*.png"
+}
+
++ label {
+  left = 15%
+  top = 31%
+  align = "center"
+  id = "__timeout__"
+  text = "Sistem dimulai dalam %d detik"
+  color = "#9fb3c8"
+  font = "Ubuntu Regular 17"
+}

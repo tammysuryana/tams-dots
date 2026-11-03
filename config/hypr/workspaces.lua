@@ -1,0 +1,1 @@
+-- Pembagian workspace per monitor. File ini akan ditimpa nwg-displays kalau kamu memakainya.

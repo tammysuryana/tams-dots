@@ -1,0 +1,27 @@
+# Ikon OneUI4 (mjkim0727, GPL-3.0) untuk tams-dots
+pkgname=tams-dots-oneui4-icons-git
+_pkgname=OneUI4-Icons
+pkgver=r1
+pkgrel=1
+pkgdesc="OneUI4 icon theme (mjkim0727) for tams-dots"
+arch=('any')
+url="https://github.com/mjkim0727/OneUI4-Icons"
+license=('GPL-3.0-only')
+makedepends=('git')
+source=("git+${url}.git")
+sha256sums=('SKIP')
+options=('!strip')
+
+pkgver() {
+  cd "$_pkgname"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+package() {
+  cd "$_pkgname"
+  install -dm755 "$pkgdir/usr/share/icons"
+  for _i in OneUI OneUI-dark OneUI-light; do
+    cp -dr --no-preserve=mode "$_i" "$pkgdir/usr/share/icons/$_i"
+  done
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

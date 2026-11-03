@@ -1,0 +1,132 @@
+# Paket dari repo resmi Arch. Satu nama per baris, # = komentar.
+# Installer melewati otomatis nama yang tidak tersedia di komputer itu (misal Arch ARM).
+
+# Hyprland & desktop
+hyprland
+hyprsunset
+hypridle
+hyprlock
+hyprpicker
+uwsm
+xdg-desktop-portal
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+xdg-desktop-portal-kde
+wl-clipboard
+cliphist
+fuzzel
+sddm
+
+# Shell (quickshell) & Qt
+quickshell
+qt6-5compat
+qt6-imageformats
+qt6-multimedia
+qt6-multimedia-ffmpeg
+qt6-positioning
+qt6-quicktimeline
+qt6-sensors
+qt6-svg
+qt6-tools
+qt6-translations
+qt6-virtualkeyboard
+qt6-wayland
+kdialog
+kirigami
+syntax-highlighting
+
+# Audio & media
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+pavucontrol-qt
+playerctl
+cava
+easyeffects
+mpv
+ffmpeg
+ffmpegthumbnailer
+songrec
+
+# Jaringan, bluetooth, layar
+networkmanager
+network-manager-applet
+plasma-nm
+bluez
+bluez-utils
+bluedevil
+geoclue
+brightnessctl
+ddcutil
+upower
+nwg-displays
+
+# KDE pendukung (file manager, polkit, keyring, pengaturan)
+dolphin
+systemsettings
+polkit-kde-agent
+gnome-keyring
+libsecret
+
+# Screenshot, rekam, OCR
+grim
+slurp
+swappy
+hyprshot
+wf-recorder
+tesseract
+tesseract-data-eng
+
+# Alat bantu
+bc
+curl
+wget
+git
+unzip
+rsync
+ripgrep
+jq
+go-yq
+cmake
+xdg-user-dirs
+wtype
+ydotool
+libnotify
+psmisc
+imagemagick
+translate-shell
+glib2
+
+# Python (skrip warna dll.)
+python
+uv
+clang
+gtk4
+libadwaita
+libsoup3
+libportal-gtk4
+gobject-introspection
+
+# Terminal & shell
+kitty
+foot
+fish
+starship
+eza
+fastfetch
+btop
+
+# Tema & font
+matugen
+adw-gtk-theme
+breeze
+kvantum
+qt5ct
+qt6ct
+nwg-look
+fontconfig
+ttf-jetbrains-mono-nerd
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji

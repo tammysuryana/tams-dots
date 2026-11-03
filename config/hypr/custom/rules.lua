@@ -1,0 +1,3 @@
+-- Window/layer/workspace rule kustom. Contoh:
+-- hl.window_rule({ match = { class = "^(foo)$" }, float = true })
+-- https://wiki.hypr.land/Configuring/Window-Rules/

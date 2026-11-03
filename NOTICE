@@ -1,0 +1,56 @@
+tams-dots
+Copyright (C) 2026 tams (https://github.com/tammysuryana)
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License version 3 or (at your option) any
+later version. See the LICENSE file.
+
+------------------------------------------------------------------------------
+Pengakuan / Credits
+------------------------------------------------------------------------------
+
+tams-dots dibangun di atas karya open-source berikut. Lisensi aslinya tetap
+berlaku untuk bagian masing-masing.
+
+Shell (folder shell/) dan sebagian config Hyprland (config/hypr/hyprland/,
+config/matugen/, config/kde-material-you-colors/, packages/python-requirements.txt):
+  Turunan (modified) dari "illogical-impulse" oleh end-4
+  https://github.com/end-4/dots-hyprland  — GPL-3.0
+  melalui fork oleh pctrade  https://github.com/pctrade/end4-pC  — GPL-3.0
+  Diubah oleh tams: nama & branding, folder state/cache sendiri, updater,
+  pengaturan bawaan, perbaikan bug, mode layar, dan lainnya.
+
+Tema boot (theme/grub/, theme/plymouth/):
+  Turunan dari cachyos-grub-theme (diegons490) — GPL-3.0
+  https://github.com/diegons490/cachyos-grub-theme
+  dan cachyos-plymouth-bootanimation (CachyOS) — GPL
+  https://github.com/CachyOS/plymouth-theme
+  Font GRUB: Terminus (SIL OFL 1.1), Ubuntu (Ubuntu Font Licence 1.0).
+
+Logo Arch Linux:
+  "Arch Linux" dan logonya adalah merek dagang Arch Linux, dipakai sesuai
+  Arch Linux Trademark Policy (https://terms.archlinux.org/docs/trademark-policy/).
+  tams-dots bukan proyek resmi Arch Linux.
+
+Font:
+  Google Sans Flex — SIL Open Font License 1.1 (theme/sddm/tams-dots/fonts/LICENSE-GoogleSansFlex)
+  Material Symbols — Apache License 2.0 (Google)
+  Font tulisan tangan di shell/assets/fonts/handwriting/ — lihat LICENSES.txt di folder itu
+
+Komponen lain di dalam shell/:
+  fuzzysort (farzher) — MIT
+  thumbnail-generator-ubuntu (difference-engine) — MIT
+  shapes (shell/modules/common/widgets/shapes/) — Apache License 2.0, lihat LICENSE di folder itu
+  shader cava (config/cava/shaders/, rezky_nightky) — MIT
+
+Tema Kvantum Colloid (config/Kvantum/Colloid/) — vinceliuice, GPL-3.0
+  https://github.com/vinceliuice/Colloid-kde
+
+Diunduh langsung dari sumber aslinya saat install (tidak disertakan di repo ini):
+  MacTahoe icon & cursor theme — vinceliuice, GPL-3.0
+  Tahoe GTK theme — kayozxo  https://github.com/kayozxo/GNOME-macOS-Tahoe
+  OneUI4 icons — mjkim0727, GPL-3.0
+  MicroTeX — NanoMichael, MIT
+
+Wallpaper bawaan dan video latar layar login dibuat khusus untuk tams-dots
+dan ikut berlisensi GPL-3.0 bersama repo ini.

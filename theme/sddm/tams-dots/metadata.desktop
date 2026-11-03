@@ -1,0 +1,12 @@
+[SddmGreeterTheme]
+Name=tams-dots
+Description=Layar login tams-dots: panel kaca + latar video, serasi dengan tema GRUB & Plymouth tams-dots
+Author=tams (tammysuryana)
+License=GPL-3.0-or-later
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=tams-dots
+Theme-API=2.0
+QtVersion=6

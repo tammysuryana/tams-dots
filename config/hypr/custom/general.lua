@@ -1,0 +1,3 @@
+-- Setelan umum kustom. Contoh:
+-- hl.config({ general = { gaps_in = 4 } })
+-- Daftar variabel: https://wiki.hypr.land/Configuring/Variables/

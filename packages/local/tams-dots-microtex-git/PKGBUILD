@@ -1,0 +1,42 @@
+# MicroTeX (NanoMichael, MIT) di /opt/MicroTeX, dipakai shell untuk menampilkan rumus LaTeX
+pkgname=tams-dots-microtex-git
+_pkgname=MicroTeX
+pkgver=r1
+pkgrel=1
+pkgdesc="MicroTeX LaTeX renderer for tams-dots"
+arch=('x86_64' 'aarch64')
+url="https://github.com/NanoMichael/${_pkgname}"
+license=('MIT')
+depends=('tinyxml2' 'gtkmm3' 'gtksourceviewmm' 'cairomm')
+makedepends=('git' 'cmake')
+source=("git+${url}.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$_pkgname"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "$_pkgname"
+  sed -i 's/gtksourceviewmm-3.0/gtksourceviewmm-4.0/' CMakeLists.txt
+  # fontconfig baru: FcFreeTypeQuery ada di fcfreetype.h
+  grep -q 'fontconfig/fcfreetype.h' src/platform/cairo/graphic_cairo.cpp || \
+    sed -i '0,/#include <fontconfig\/fontconfig.h>/s//#include <fontconfig\/fontconfig.h>\n#include <fontconfig\/fcfreetype.h>/' src/platform/cairo/graphic_cairo.cpp
+  # sesuaikan dengan versi tinyxml2 yang terpasang
+  local so; so="$(basename "$(readlink -f /usr/lib/libtinyxml2.so)" | grep -o 'so\.[0-9]*' || true)"
+  [ -n "$so" ] && sed -i -E "s/tinyxml2\.so\.[0-9]+/tinyxml2.${so}/" CMakeLists.txt
+}
+
+build() {
+  cd "$_pkgname"
+  cmake -B build -S . -DCMAKE_BUILD_TYPE=None
+  cmake --build build
+}
+
+package() {
+  cd "$_pkgname"
+  install -Dm0755 -t "$pkgdir/opt/$_pkgname/" build/LaTeX
+  cp -r build/res "$pkgdir/opt/$_pkgname/"
+  install -Dm0644 -t "$pkgdir/usr/share/licenses/$pkgname/" LICENSE
+}

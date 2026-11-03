@@ -1,0 +1,11 @@
+# Paket dari AUR (dipasang lewat yay). Satu nama per baris, # = komentar.
+darkly-bin
+breeze-plus
+wlogout
+qt6-avif-image-plugin
+bibata-cursor-theme-bin
+otf-space-grotesk
+ttf-material-symbols-variable-git
+ttf-readex-pro
+ttf-rubik-vf
+ttf-twemoji

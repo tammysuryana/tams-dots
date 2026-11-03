@@ -1,0 +1,5 @@
+-- Pengaturan monitor. Kosong = semua layar otomatis memakai resolusi terbaiknya
+-- (aturan dasar ada di hyprland/general.lua).
+-- Atur lewat aplikasi `nwg-displays` (file ini akan ditimpa), atau tulis sendiri, contoh:
+--
+-- hl.monitor({ output = "HDMI-A-1", mode = "1920x1080@60", position = "0x0", scale = 1 })

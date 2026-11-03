@@ -1,0 +1,169 @@
+[ColorEffects:Disabled]
+ChangeSelectionColor=
+Color=#24283b
+ColorAmount=0.5
+ColorEffect=3
+ContrastAmount=0
+ContrastEffect=0
+Enable=
+IntensityAmount=0
+IntensityEffect=0
+
+[ColorEffects:Inactive]
+ChangeSelectionColor=true
+Color=#16161e
+ColorAmount=0.025
+ColorEffect=0
+ContrastAmount=0.1
+ContrastEffect=0
+Enable=true
+IntensityAmount=0
+IntensityEffect=0
+
+[Colors:Button]
+BackgroundAlternate=#292e42
+BackgroundNormal=#24283b
+DecorationFocus=#7aa2f7
+DecorationHover=#7aa2f7
+ForegroundActive=#7aa2f7
+ForegroundInactive=#a9b1d6
+ForegroundLink=#7aa2f7
+ForegroundNegative=#f7768e
+ForegroundNeutral=#e0af68
+ForegroundNormal=#c0caf5
+ForegroundPositive=#9ece6a
+ForegroundVisited=#bb9af7
+
+[Colors:Complementary]
+BackgroundAlternate=#16161e
+BackgroundNormal=#1f2030
+DecorationFocus=#7aa2f7
+DecorationHover=#7aa2f7
+ForegroundActive=#7aa2f7
+ForegroundInactive=#a9b1d6
+ForegroundLink=#7aa2f7
+ForegroundNegative=#f7768e
+ForegroundNeutral=#e0af68
+ForegroundNormal=#c0caf5
+ForegroundPositive=#9ece6a
+ForegroundVisited=#bb9af7
+
+[Colors:Header]
+BackgroundAlternate=#1a1b26
+BackgroundNormal=#1f2030
+DecorationFocus=#7aa2f7
+DecorationHover=#7aa2f7
+ForegroundActive=#7aa2f7
+ForegroundInactive=#a9b1d6
+ForegroundLink=#7aa2f7
+ForegroundNegative=#f7768e
+ForegroundNeutral=#e0af68
+ForegroundNormal=#c0caf5
+ForegroundPositive=#9ece6a
+ForegroundVisited=#bb9af7
+
+[Colors:Selection]
+BackgroundAlternate=#374465
+BackgroundNormal=#7aa2f7
+DecorationFocus=#7aa2f7
+DecorationHover=#7aa2f7
+ForegroundActive=#16161e
+ForegroundInactive=#16161e
+ForegroundLink=#16161e
+ForegroundNegative=#16161e
+ForegroundNeutral=#16161e
+ForegroundNormal=#16161e
+ForegroundPositive=#16161e
+ForegroundVisited=#16161e
+
+[Colors:Tooltip]
+BackgroundAlternate=#24283b
+BackgroundNormal=#292e42
+DecorationFocus=#7aa2f7
+DecorationHover=#7aa2f7
+ForegroundActive=#7aa2f7
+ForegroundInactive=#a9b1d6
+ForegroundLink=#7aa2f7
+ForegroundNegative=#f7768e
+ForegroundNeutral=#e0af68
+ForegroundNormal=#c0caf5
+ForegroundPositive=#9ece6a
+ForegroundVisited=#bb9af7
+
+[Colors:View]
+BackgroundAlternate=#1a1b26
+BackgroundNormal=#14141b
+DecorationFocus=#7aa2f7
+DecorationHover=#7aa2f7
+ForegroundActive=#7aa2f7
+ForegroundInactive=#a9b1d6
+ForegroundLink=#7aa2f7
+ForegroundNegative=#f7768e
+ForegroundNeutral=#e0af68
+ForegroundNormal=#c0caf5
+ForegroundPositive=#9ece6a
+ForegroundVisited=#bb9af7
+
+[Colors:Window]
+BackgroundAlternate=#1f2030
+BackgroundNormal=#1a1b26
+DecorationFocus=#7aa2f7
+DecorationHover=#7aa2f7
+ForegroundActive=#7aa2f7
+ForegroundInactive=#a9b1d6
+ForegroundLink=#7aa2f7
+ForegroundNegative=#f7768e
+ForegroundNeutral=#e0af68
+ForegroundNormal=#c0caf5
+ForegroundPositive=#9ece6a
+ForegroundVisited=#bb9af7
+
+[General]
+ColorScheme=TamsNamed
+ColorSchemeHash=80597918e0315a7e4abe9ec07188fead12852915
+LastUsedCustomAccentColor=184,117,220
+TerminalApplication=kitty -1
+XftHintStyle=hintslight
+XftSubPixel=none
+fixed=JetBrainsMono Nerd Font,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+font=JetBrainsMono Nerd Font,11,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,Medium
+menuFont=JetBrainsMono Nerd Font,11,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,Medium
+smallestReadableFont=JetBrainsMono Nerd Font,9,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,Medium
+toolBarFont=JetBrainsMono Nerd Font,11,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,Medium
+
+[Icons]
+Theme=MacTahoe
+
+[KDE]
+contrast=4
+frameContrast=0.2
+widgetStyle=Darkly
+
+[KFileDialog Settings]
+Allow Expansion=false
+Automatically select filename extension=true
+Breadcrumb Navigation=false
+Decoration position=2
+Show Full Path=false
+Show Inline Previews=true
+Show Preview=false
+Show Speedbar=true
+Show hidden files=false
+Sort by=Date
+Sort directories first=true
+Sort hidden files last=false
+Sort reversed=true
+Speedbar Width=168
+View Style=Simple
+
+[Sounds]
+Theme=freedesktop
+
+[WM]
+activeBackground=31,32,48
+activeBlend=192,202,245
+activeFont=Google Sans Flex,10,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,Medium
+activeForeground=192,202,245
+inactiveBackground=26,27,38
+inactiveBlend=169,177,214
+inactiveForeground=169,177,214
