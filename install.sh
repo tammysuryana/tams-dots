@@ -291,8 +291,10 @@ ok "pengaturan tampilan aplikasi"
 # ---------------------------------------------------------------------------
 say "Shell terminal, layar login & tampilan boot"
 if command -v fish >/dev/null && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v fish)" ]; then
-  tanya "Pakai fish sebagai shell terminal (warna & saran perintah otomatis)?" y \
-    && chsh -s "$(command -v fish)" && ok "shell terminal = fish"
+  if tanya "Pakai fish sebagai shell terminal (warna & saran perintah otomatis)?" y; then
+    if [ "$MODE" = full ]; then sudo chsh -s "$(command -v fish)" "$USER"; else chsh -s "$(command -v fish)"; fi \
+      && ok "shell terminal = fish" || warn "gagal mengganti shell, jalankan manual: chsh -s $(command -v fish)"
+  fi
 fi
 if [ "$MODE" = full ] && command -v sddm >/dev/null; then
   if ! systemctl is-enabled display-manager.service >/dev/null 2>&1; then

@@ -61,6 +61,7 @@ install_grub() {
 install_plymouth() {
     echo "[Plymouth] animasi startup"
     if ! command -v plymouth-set-default-theme >/dev/null; then skip "plymouth tidak terpasang, dilewati"; return; fi
+    if ! compgen -G "/boot/vmlinuz-*" >/dev/null; then skip "tidak ada kernel di /boot (container/VM khusus?), dilewati"; return; fi
     [ -f "$SIMPAN/plymouth-theme" ] || plymouth-set-default-theme > "$SIMPAN/plymouth-theme"
     install -d -m 755 "/usr/share/plymouth/themes/$NAMA"
     cp -r "$DIR/plymouth/$NAMA/." "/usr/share/plymouth/themes/$NAMA/"

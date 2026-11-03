@@ -117,7 +117,8 @@ eza
 fastfetch
 btop
 
-# Tema & font
+# Tema & font (plymouth = animasi startup)
+plymouth
 matugen
 adw-gtk-theme
 breeze
