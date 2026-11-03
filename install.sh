@@ -254,6 +254,7 @@ fi
 
 if [ "$MODE" = update ]; then
   echo -e "\n${G}${B}Update selesai.${N} Muat ulang shell: tekan Ctrl+Super+R, atau logout lalu login lagi."
+  echo -e "Terima kasih sudah memakai tams-dots! 💖 Dukung di ${B}https://saweria.co/tamsrich${N}"
   exit 0
 fi
 
@@ -329,4 +330,7 @@ echo "  1. Restart komputer:  reboot"
 echo "  2. Di layar login pilih sesi 'Hyprland', masuk."
 echo "  3. Tekan Super + / untuk melihat semua tombol pintas."
 [ -d "$BACKUP" ] && echo "  Pengaturan lama yang tertimpa: ${BACKUP/#$HOME/\~}"
+echo
+echo -e "${C}Terima kasih sudah memasang tams-dots! 💖${N}"
+echo -e "Kalau bermanfaat, dukung pengembangannya di ${B}https://saweria.co/tamsrich${N}"
 exit 0

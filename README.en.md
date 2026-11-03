@@ -6,6 +6,8 @@ One command installs everything.
 
 🇮🇩 Bahasa Indonesia: [README.md](README.md) (the most detailed guide)
 
+💖 **Enjoying tams-dots? Support its development on [Saweria](https://saweria.co/tamsrich).**
+
 ## Supported machines
 
 | Machine | Status |
@@ -57,6 +59,11 @@ sudo bash ~/tams-dots/theme/sddm.sh install /path/to/video-or-image   # custom l
 sudo bash ~/tams-dots/theme/sddm.sh uninstall                        # restore default login screen
 sudo bash ~/tams-dots/theme/boot.sh uninstall                        # restore previous GRUB/Plymouth
 ```
+
+## Support
+
+tams-dots is free and will stay free. If it helps you, consider supporting development on
+**[Saweria](https://saweria.co/tamsrich)** 💖, starring the repo, or reporting issues.
 
 ## License & credits
 

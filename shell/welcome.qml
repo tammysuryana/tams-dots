@@ -474,23 +474,28 @@ ApplicationWindow {
                 }
 
                 ContentSection {
-                    icon: "monitoring"
-                    title: Translation.tr("Useless buttons")
+                    icon: "favorite"
+                    title: Translation.tr("Support tams-dots")
+
+                    NoticeBox {
+                        Layout.fillWidth: true
+                        text: Translation.tr("Thank you for installing tams-dots! If it is useful for you, you can support its development on Saweria. Every bit of support means a lot.")
+                    }
 
                     Flow {
                         Layout.fillWidth: true
                         spacing: 5
 
                         RippleButtonWithIcon {
-                            nerdIcon: "󰊤"
-                            mainText: Translation.tr("GitHub")
+                            materialIcon: "favorite"
+                            mainText: Translation.tr("Support on Saweria")
                             onClicked: {
-                                Qt.openUrlExternally("https://github.com/tammysuryana/tams-dots");
+                                Qt.openUrlExternally("https://saweria.co/tamsrich");
                             }
                         }
                         RippleButtonWithIcon {
-                            materialIcon: "favorite"
-                            mainText: "Funny number"
+                            nerdIcon: "󰊤"
+                            mainText: Translation.tr("GitHub")
                             onClicked: {
                                 Qt.openUrlExternally("https://github.com/tammysuryana/tams-dots");
                             }

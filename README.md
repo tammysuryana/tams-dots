@@ -6,6 +6,8 @@ Cukup satu perintah untuk memasang semuanya.
 
 🇬🇧 English: [README.en.md](README.en.md)
 
+💖 **Suka tams-dots? Dukung pengembangannya di [Saweria](https://saweria.co/tamsrich).**
+
 ---
 
 ## Daftar isi
@@ -19,7 +21,8 @@ Cukup satu perintah untuk memasang semuanya.
 7. [Tombol pintas penting](#7-tombol-pintas-penting)
 8. [Update, ubah, dan copot](#8-update-ubah-dan-copot)
 9. [Kalau ada masalah](#9-kalau-ada-masalah)
-10. [Lisensi & kredit](#10-lisensi--kredit)
+10. [Dukung tams-dots](#10-dukung-tams-dots)
+11. [Lisensi & kredit](#11-lisensi--kredit)
 
 ---
 
@@ -235,7 +238,17 @@ Pengaturan lama yang tertimpa saat install disimpan di `~/.tams-dots-backup-<tan
 
 ---
 
-## 10. Lisensi & kredit
+## 10. Dukung tams-dots
+
+tams-dots gratis dan akan tetap gratis. Kalau bermanfaat buatmu, kamu bisa mendukung pengembangannya lewat
+**[Saweria](https://saweria.co/tamsrich)** 💖. Dukungan sekecil apa pun sangat berarti.
+
+Cara lain membantu: kasih ⭐ di GitHub, laporkan masalah di [Issues](https://github.com/tammysuryana/tams-dots/issues),
+atau ceritakan ke teman yang pakai Arch Linux.
+
+---
+
+## 11. Lisensi & kredit
 
 tams-dots dirilis dengan lisensi **GNU GPL-3.0** ([LICENSE](LICENSE)). Kamu bebas memakai, mengubah, dan membagikan,
 asalkan hasil ubahannya juga GPL-3.0 dan kredit ini tetap ada.
