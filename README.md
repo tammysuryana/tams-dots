@@ -253,8 +253,7 @@ atau ceritakan ke teman yang pakai Arch Linux.
 tams-dots dirilis dengan lisensi **GNU GPL-3.0** ([LICENSE](LICENSE)). Kamu bebas memakai, mengubah, dan membagikan,
 asalkan hasil ubahannya juga GPL-3.0 dan kredit ini tetap ada.
 
-tams-dots dibangun dari karya open-source lain. Shell-nya turunan dari *illogical-impulse* (end-4) melalui fork pctrade,
-dan tema bootnya turunan tema CachyOS. Daftar lengkap pembuat asli dan lisensinya ada di [NOTICE](NOTICE).
+tams-dots dibangun di atas beberapa karya open-source lain. Daftar lengkap pembuat asli dan lisensinya ada di [NOTICE](NOTICE).
 "Arch Linux" dan logonya adalah merek dagang Arch Linux. tams-dots bukan proyek resmi Arch Linux.
 
 ### Isi repo

@@ -67,6 +67,5 @@ tams-dots is free and will stay free. If it helps you, consider supporting devel
 
 ## License & credits
 
-GNU GPL-3.0 ([LICENSE](LICENSE)). tams-shell is a modified derivative of *illogical-impulse* by end-4
-(via pctrade's fork), and the boot themes derive from CachyOS themes. Full credits in [NOTICE](NOTICE).
+GNU GPL-3.0 ([LICENSE](LICENSE)). tams-dots builds on other open-source projects; full credits in [NOTICE](NOTICE).
 "Arch Linux" and the Arch logo are trademarks of Arch Linux; this is not an official Arch Linux project.
