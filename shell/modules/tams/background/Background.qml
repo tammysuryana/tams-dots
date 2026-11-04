@@ -173,6 +173,19 @@ Variants {
             }
         }
 
+        // Safety net: if the thumbnail transition never finishes, the static
+        // thumbnail keeps covering mpvpaper and the live wallpaper looks frozen
+        Timer {
+            interval: 2500
+            running: bgRoot.wallpaperIsVideo && !bgRoot.videoRevealed
+                && !transitionAnim.running && !GlobalStates.screenLocked
+            onTriggered: {
+                bgRoot.transitionPending = false
+                bgRoot.transitionProgress = 1.0
+                bgRoot.videoRevealed = true
+            }
+        }
+
         Timer {
             id: wallpaperChangeTimer
             interval: Config.options.wallpaperSelector.changeInterval

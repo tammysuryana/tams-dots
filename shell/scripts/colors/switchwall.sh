@@ -148,7 +148,7 @@ CUSTOM_DIR="$XDG_CONFIG_HOME/hypr/custom"
 RESTORE_SCRIPT_DIR="$CUSTOM_DIR/scripts"
 RESTORE_SCRIPT="$RESTORE_SCRIPT_DIR/__restore_video_wallpaper.sh"
 THUMBNAIL_DIR="$RESTORE_SCRIPT_DIR/mpvpaper_thumbnails"
-MPVPAPER_FLAGS="-p -a max"
+MPVPAPER_FLAGS="-p"
 VIDEO_OPTS="no-audio loop hwdec=auto scale=bilinear interpolation=no video-sync=display-resample panscan=1.0 video-scale-x=1.0 video-scale-y=1.0 video-align-x=0.5 video-align-y=0.5 load-scripts=no"
 # One control socket per output, so the shell can pause and resume the live
 # wallpaper instead of only being able to kill it.
