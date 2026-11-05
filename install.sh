@@ -88,6 +88,17 @@ fi
 
 baca_daftar() { grep -vE '^\s*(#|$)' "$1" | sed 's/\s*#.*//'; }
 
+# makepkg -si (pacman >= 7.1) memanggil "sudo -k" -> selalu minta password lagi.
+# Jadi build saja di folder sekarang, dependensi & hasil dipasang lewat sesi sudo installer.
+makepkg_pasang() {
+  local deps pkgs
+  mapfile -t deps < <(makepkg --printsrcinfo | sed -nE 's/^\s*(make|check)?depends = ([^<>=]+).*/\2/p')
+  [ ${#deps[@]} -eq 0 ] || sudo pacman -S --needed --noconfirm --asdeps "${deps[@]}" || return
+  makepkg -f --noconfirm || return
+  mapfile -t pkgs < <(makepkg --packagelist | grep -v -- '-debug-')
+  sudo pacman -U --needed --noconfirm "${pkgs[@]}"
+}
+
 # ---------------------------------------------------------------------------
 # 1-4: Paket (dilewati di --configs-only / --update)
 # ---------------------------------------------------------------------------
@@ -99,6 +110,14 @@ if [ "$MODE" = full ]; then
   for p in "${WANT[@]}"; do
     if pacman -Si "$p" >/dev/null 2>&1; then ADA+=("$p"); else KE_AUR+=("$p"); fi
   done
+  # pulseaudio (mis. pilihan audio di archinstall) bentrok dengan pipewire-pulse,
+  # dan --noconfirm menjawab "N" saat ditanya menghapusnya -> ganti dulu ke pipewire
+  mapfile -t PULSE < <(pacman -Qq 2>/dev/null | grep -xE 'pulseaudio(-(bluetooth|equalizer|jack|lirc|rtp|zeroconf))?' || true)
+  if [ ${#PULSE[@]} -gt 0 ]; then
+    echo "   pulseaudio terpasang, diganti ke pipewire: ${PULSE[*]}"
+    sudo pacman -Rdd --noconfirm "${PULSE[@]}"
+    ok "pulseaudio dilepas (audio pindah ke pipewire setelah login ulang)"
+  fi
   sudo pacman -S --needed --noconfirm "${ADA[@]}"
   ok "${#ADA[@]} paket resmi terpasang"
   [ ${#KE_AUR[@]} -gt 0 ] && echo "   (tidak ada di repo komputer ini, dicoba lewat AUR: ${KE_AUR[*]})"
@@ -108,7 +127,7 @@ if [ "$MODE" = full ]; then
     sudo pacman -S --needed --noconfirm base-devel git
     tmp="$(mktemp -d)"
     git clone -q https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
-    (cd "$tmp/yay-bin" && makepkg -si --noconfirm)
+    (cd "$tmp/yay-bin" && makepkg_pasang)
     rm -rf "$tmp"
   fi
   mapfile -t AUR < <(baca_daftar "$REPO/packages/aur.txt")
@@ -125,7 +144,7 @@ if [ "$MODE" = full ]; then
     nama="$(basename "$d")"
     if pacman -Q "$nama" >/dev/null 2>&1; then ok "$nama sudah ada"; continue; fi
     tmp="$(mktemp -d)"; cp -r "$d." "$tmp/"
-    (cd "$tmp" && makepkg -si --noconfirm --needed) && ok "$nama" || warn "gagal build $nama"
+    (cd "$tmp" && makepkg_pasang) && ok "$nama" || warn "gagal build $nama"
     rm -rf "$tmp"
   done
 
