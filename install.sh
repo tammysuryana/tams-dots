@@ -212,6 +212,14 @@ ok "tams-shell -> ~/.config/quickshell/tams-shell"
 rsync -a "$REPO/assets/wallpapers/" "$XDG_DATA_HOME/tams-dots/wallpapers/"
 ok "wallpaper -> ~/.local/share/tams-dots/wallpapers"
 
+# Versi lama memasang hyprland-session.target (WantedBy=default.target): target itu menyalakan
+# graphical-session.target begitu login, sehingga uwsm menolak menjalankan Hyprland -> balik ke SDDM
+if [ -f "$XDG_CONFIG_HOME/systemd/user/hyprland-session.target" ]; then
+  systemctl --user disable hyprland-session.target >/dev/null 2>&1 || true
+  rm -f "$XDG_CONFIG_HOME/systemd/user/hyprland-session.target"
+  ok "hyprland-session.target lama dihapus"
+fi
+
 if [ "$MODE" = update ]; then
   # Hanya bagian bawaan Hyprland; custom/, monitor, config.json milikmu tidak disentuh
   cadangkan "$XDG_CONFIG_HOME/hypr/hyprland"
@@ -294,7 +302,6 @@ if [ "$MODE" = full ]; then
   fi
 fi
 systemctl --user daemon-reload 2>/dev/null || true
-systemctl --user enable hyprland-session.target >/dev/null 2>&1 || true
 xdg-user-dirs-update 2>/dev/null || true
 if command -v gsettings >/dev/null; then
   gsettings set org.gnome.desktop.interface font-name 'Google Sans Flex Medium 11 @opsz=11,wght=500' 2>/dev/null || true
