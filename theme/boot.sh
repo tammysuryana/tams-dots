@@ -41,6 +41,33 @@ rebuild_initramfs() {
 
 pakai_grub() { [ -f /etc/default/grub ] && command -v grub-mkconfig >/dev/null; }
 
+# Entri systemd-boot biasa (bukan UKI) menyimpan parameter kernel di baris "options"
+entri_sdboot() {
+    for d in /boot/loader/entries /efi/loader/entries /boot/efi/loader/entries; do
+        [ -d "$d" ] && compgen -G "$d/*.conf"
+    done
+}
+
+# Tanpa GRUB: "splash" ditaruh di /etc/kernel/cmdline (UKI) atau entri systemd-boot.
+# Harus sebelum rebuild_initramfs supaya UKI dibangun ulang dengan cmdline baru.
+install_cmdline() {
+    pakai_grub && return
+    if [ -f /etc/kernel/cmdline ] && ! grep -qw splash /etc/kernel/cmdline; then
+        [ -f "$SIMPAN/kernel-cmdline" ] || cp -a /etc/kernel/cmdline "$SIMPAN/kernel-cmdline"
+        sed -i -E '1s/[[:space:]]*$/ splash/' /etc/kernel/cmdline
+        ok "splash ditambahkan ke /etc/kernel/cmdline (UKI)"
+    fi
+    local f
+    for f in $(entri_sdboot); do
+        grep -qE '^options\b.*\bsplash\b' "$f" && continue
+        grep -qE '^options\b' "$f" || continue
+        mkdir -p "$SIMPAN/entries"
+        [ -f "$SIMPAN/entries/$(basename "$f")" ] || { cp -a "$f" "$SIMPAN/entries/"; echo "$f" >> "$SIMPAN/entries.list"; }
+        sed -i -E 's/^(options\b.*[^[:space:]])[[:space:]]*$/\1 splash/' "$f"
+        ok "splash ditambahkan ke $f"
+    done
+}
+
 install_grub() {
     echo "[GRUB] menu boot"
     if ! pakai_grub; then skip "bootloader bukan GRUB, dilewati"; return; fi
@@ -72,6 +99,7 @@ install_plymouth() {
         ok "hook plymouth ditambahkan ke /etc/mkinitcpio.conf"
     fi
     plymouth-set-default-theme "$NAMA"
+    install_cmdline
     rebuild_initramfs
     ok "tema Plymouth $NAMA"
 }
@@ -85,6 +113,11 @@ uninstall_all() {
     else skip "tidak ada yang perlu dikembalikan"; fi
     echo "[Plymouth]"
     if [ -f "$SIMPAN/mkinitcpio.conf" ]; then cp -a "$SIMPAN/mkinitcpio.conf" /etc/mkinitcpio.conf; fi
+    if [ -f "$SIMPAN/kernel-cmdline" ]; then cp -a "$SIMPAN/kernel-cmdline" /etc/kernel/cmdline; ok "/etc/kernel/cmdline dikembalikan"; fi
+    if [ -f "$SIMPAN/entries.list" ]; then
+        while read -r f; do cp -a "$SIMPAN/entries/$(basename "$f")" "$f"; done < "$SIMPAN/entries.list"
+        ok "entri systemd-boot dikembalikan"
+    fi
     if [ -f "$SIMPAN/plymouth-theme" ] && command -v plymouth-set-default-theme >/dev/null; then
         plymouth-set-default-theme "$(cat "$SIMPAN/plymouth-theme")"
         rebuild_initramfs
