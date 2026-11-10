@@ -95,6 +95,8 @@ ydotool
 libnotify
 psmisc
 imagemagick
+mpvpaper
+socat
 translate-shell
 glib2
 

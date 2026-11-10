@@ -205,6 +205,8 @@ cadangkan() { # cadangkan $1 (path di $HOME) kalau ada, sebelum ditimpa
 
 say "Pasang shell & pengaturan"
 mkdir -p "$XDG_CONFIG_HOME/quickshell" "$XDG_DATA_HOME/tams-dots/wallpapers" "$XDG_STATE_HOME/tams-dots" "$HOME/.local/bin"
+# Cache thumbnail freedesktop: tanpa folder ini pratinjau wallpaper (menu klik kanan) tidak pernah muncul
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/thumbnails"/{normal,large,x-large,xx-large}
 
 # Shell: selalu disamakan dengan repo (folder ini tidak untuk diedit pengguna)
 rsync -a --delete "$REPO/shell/" "$XDG_CONFIG_HOME/quickshell/tams-shell/"

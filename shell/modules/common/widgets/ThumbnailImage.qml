@@ -43,8 +43,11 @@ StyledImage {
         command: {
             const maxSize = Images.thumbnailSizes[root.thumbnailSizeName];
             const thumbPath = FileUtils.trimFileProtocol(root.thumbnailPath);
+            // Folder cache per ukuran (x-large dst) belum tentu ada di mesin baru; tanpa mkdir
+            // magick gagal diam-diam dan pratinjau tidak pernah muncul.
+            const thumbDir = thumbPath.substring(0, thumbPath.lastIndexOf("/"));
             return ["bash", "-c",
-                `[ -f '${thumbPath}' ] && exit 0 || { tmp='${thumbPath}.$$.tmp.png'; magick '${root.sourcePath}' -resize ${maxSize}x${maxSize} '\${tmp}' && mv '\${tmp}' '${thumbPath}' && exit 1; exit 2; }`
+                `[ -f '${thumbPath}' ] && exit 0 || { mkdir -p '${thumbDir}'; tmp='${thumbPath}.$$.tmp.png'; magick '${root.sourcePath}' -resize ${maxSize}x${maxSize} '\${tmp}' && mv '\${tmp}' '${thumbPath}' && exit 1; exit 2; }`
             ]
         }
         onExited: (exitCode, exitStatus) => {
