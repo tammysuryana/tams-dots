@@ -49,6 +49,24 @@ Singleton {
 
     Process { id: commandProc }
 
+    // Colok/cabut layar: skrip restore (mode "pastikan") menyalakan mpvpaper untuk layar
+    // baru dan mematikan yang layarnya hilang. Ditunda sebentar sampai Hyprland selesai
+    // menata monitor.
+    readonly property string restoreScriptPath:
+        `${Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")}/hypr/custom/scripts/__restore_video_wallpaper.sh`
+    Connections {
+        target: Quickshell
+        function onScreensChanged() { screensChangedTimer.restart() }
+    }
+    Timer {
+        id: screensChangedTimer
+        interval: 1500
+        onTriggered: {
+            Quickshell.execDetached(["bash", "-c",
+                `[ -x '${root.restoreScriptPath}' ] && '${root.restoreScriptPath}'`]);
+        }
+    }
+
     // Reads back the real state, so a wallpaper change or a restart does not
     // leave the button lying about what is playing.
     Process {
