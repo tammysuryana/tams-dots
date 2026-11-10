@@ -37,6 +37,26 @@ NestableObject {
         onTriggered: fetchProc.running = true
     }
 
+    // Simpan berurutan (satu proses python per layar), lalu reload sekali.
+    property var _saveQueue: []
+    property bool _positionChanged: false
+    // Jalur Win+P (custom/scripts/display-mode.py, kalau ada): posisi hasil kanvas ini harus
+    // didaftarkan sebagai letak "custom", kalau tidak ditimpa lagi oleh letak atas/bawah/kiri/kanan.
+    readonly property string displayModeScript:
+        `${Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")}/hypr/custom/scripts/display-mode.py`
+
+    function _runNextSave() {
+        if (root._saveQueue.length === 0) return
+        const args = root._saveQueue[0]
+        root._saveQueue = root._saveQueue.slice(1)
+        saveProc.command = args
+        saveProc.running = true
+    }
+
+    function saveAll() {
+        for (const idx of Object.keys(root._pendingChanges)) root.save(parseInt(idx))
+    }
+
     function updateMonitor(index, changes) {
         let m = root.monitors.slice()
         m[index] = Object.assign({}, m[index], changes)
@@ -113,8 +133,9 @@ NestableObject {
         for (const key in setPairs) args.push("--set", key, String(setPairs[key]))
         for (const key of resetKeys) args.push("--reset", key)
 
-        saveProc.command = args
-        saveProc.running = true
+        if (changedKeys.has("x") || changedKeys.has("y")) root._positionChanged = true
+        root._saveQueue = root._saveQueue.concat([args])
+        if (!saveProc.running) root._runNextSave()
 
         let pending = Object.assign({}, root._pendingChanges)
         delete pending[index]
@@ -243,7 +264,22 @@ NestableObject {
 
     Process {
         id: saveProc
-        onRunningChanged: if (!running) reloadProc.running = true
+        onRunningChanged: {
+            if (running) return
+            if (root._saveQueue.length > 0) { root._runNextSave(); return }
+            if (root._positionChanged) {
+                root._positionChanged = false
+                letakProc.running = true   // display-mode.py letak custom: terapkan + reload sendiri
+            } else {
+                reloadProc.running = true
+            }
+        }
+    }
+
+    Process {
+        id: letakProc
+        command: ["bash", "-c",
+            `if [ -f '${root.displayModeScript}' ]; then python3 '${root.displayModeScript}' letak custom; else hyprctl reload; fi`]
     }
 
     Process {

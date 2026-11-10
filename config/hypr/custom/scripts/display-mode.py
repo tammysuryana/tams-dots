@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-# Atur layar ala Windows (Win+P): laptop saja / eksternal saja / extend / mirror.
+# Atur layar ala Windows (Win+P): laptop saja / eksternal saja / extend / mirror,
+# plus letak layar eksternal saat extend (di atas / bawah / kiri / kanan laptop).
 #   display-mode.py daemon     -> jalan di background, terapkan mode tiap
 #                                 monitor dicolok/dicabut atau config di-reload
 #   display-mode.py menu       -> munculkan menu pilihan (fuzzel)
 #   display-mode.py set <mode> -> pilih mode langsung
+#   display-mode.py letak <atas|bawah|kiri|kanan> -> letak layar eksternal saat extend
 # Pilihan terakhir disimpan, jadi pas HDMI dicolok lagi mode-nya sama.
 # Kalau tidak ada monitor eksternal, layar laptop SELALU dinyalakan.
-import json, os, socket, subprocess, sys, time
+import json, os, re, socket, subprocess, sys, time
 
 # Layar bawaan laptop: eDP-1 di laptop ini, laptop lain bisa eDP-2 / LVDS-1. PC desktop: tidak ada.
 LAPTOP_PREFIX = ("eDP", "LVDS")
@@ -22,6 +24,42 @@ MODES = {
     "laptop": "Laptop saja",
 }
 DEFAULT = "eksternal"
+# Letak layar eksternal relatif terhadap laptop saat extend. Disimpan terpisah dari mode.
+LETAK_STATE = STATE + "-letak"
+LETAK = {
+    "atas": "Layar eksternal di ATAS laptop",
+    "bawah": "Layar eksternal di BAWAH laptop",
+    "kiri": "Layar eksternal di KIRI laptop",
+    "kanan": "Layar eksternal di KANAN laptop",
+    "custom": "Posisi bebas (seret di Settings → Hyprland → Displays)",
+}
+LETAK_DEFAULT = "atas"
+# Kanvas Settings menulis posisi ke file ini; letak "custom" membacanya.
+MONITORS_LUA = os.path.expanduser("~/.config/hypr/monitors.lua")
+
+
+def lua_blocks():
+    """output (mis. 'desc:BOE 0x0957') -> field dari monitors.lua."""
+    try:
+        with open(MONITORS_LUA) as f:
+            text = f.read()
+    except OSError:
+        return {}
+    out = {}
+    for body in re.findall(r"hl\.monitor\(\{(.*?)\}\)", text, re.S):
+        fields = {k: v.strip().strip('"') for k, v in
+                  re.findall(r'([A-Za-z_]\w*)\s*=\s*("(?:[^"\\]|\\.)*"|[^,\n]+)', body)}
+        if "output" in fields:
+            out[fields["output"]] = fields
+    return out
+
+
+def custom_position(m):
+    # Kanvas Settings menulis blok dengan nama keluaran (eDP-1); blok lama bisa memakai desc:.
+    blocks = lua_blocks()
+    b = blocks.get(m["name"]) or blocks.get("desc:" + m["description"]) or {}
+    pos = b.get("position", "")
+    return pos if re.fullmatch(r"-?\d+x-?\d+", pos) else None
 
 
 def hyprctl(*args):
@@ -49,6 +87,31 @@ def is_laptop(m):
     return m["name"].startswith(LAPTOP_PREFIX)
 
 
+def dims(m):
+    # Ukuran dari mode native (monitor yang sedang disabled melapor 0x0 di width/height).
+    try:
+        w, h = native(m).split("@")[0].split("x")
+        return int(w), int(h)
+    except ValueError:
+        return m["width"], m["height"]
+
+
+def get_letak():
+    try:
+        with open(LETAK_STATE) as f:
+            letak = f.read().strip()
+        return letak if letak in LETAK else LETAK_DEFAULT
+    except OSError:
+        return LETAK_DEFAULT
+
+
+def set_letak(letak):
+    os.makedirs(os.path.dirname(LETAK_STATE), exist_ok=True)
+    with open(LETAK_STATE, "w") as f:
+        f.write(letak)
+    apply(get_mode())
+
+
 def get_mode():
     try:
         with open(STATE) as f:
@@ -67,23 +130,38 @@ def apply(mode):
         mode = "laptop"
     elif not lap and mode == "laptop":
         mode = "extend"  # PC desktop tanpa layar laptop: jangan matikan semua monitor
+    # Letak saat extend: layar eksternal dijajar mendatar, laptop di sisi yang dipilih.
+    letak = get_letak()
+    ext_w = sum(dims(e)[0] for e in ext)
+    ext_h = max((dims(e)[1] for e in ext), default=0)
+    lap_w, lap_h = dims(lap) if lap else (0, 0)
+    lap_pos, ext_x0, ext_y = "0x0", 0, 0
+    if mode == "extend" and lap:
+        if letak == "atas":      lap_pos, ext_y = f"0x{ext_h}", 0
+        elif letak == "bawah":   lap_pos, ext_y = "0x0", lap_h
+        elif letak == "kiri":    lap_pos, ext_x0 = f"{ext_w}x0", 0
+        elif letak == "kanan":   lap_pos, ext_x0 = "0x0", lap_w
+    if mode == "extend" and letak == "custom" and lap:
+        lap_pos = custom_position(lap) or lap_pos
     if lap:
         if mode in ("laptop", "extend"):
-            y = max((e["height"] for e in ext), default=0) if mode == "extend" else 0
             # mirror = "" wajib, kalau tidak sisa mode mirror sebelumnya nempel terus.
-            rules.append(rule(lap, mode=native(lap), position=f"0x{y}", scale=1, mirror=""))
+            rules.append(rule(lap, mode=native(lap), position=lap_pos, scale=1, mirror=""))
         elif mode == "mirror":
             rules.append(rule(lap, mode=native(lap), position="auto", scale=1,
                               mirror=ext[0]["name"]))
         else:
             rules.append(rule(lap, disabled=True))
-    x = 0
+    x = ext_x0
     for e in ext:
         if mode == "laptop":
             rules.append(rule(e, disabled=True))
         else:
-            rules.append(rule(e, mode=native(e), position=f"{x}x0", scale=1, mirror=""))
-            x += e["width"]
+            pos = f"{x}x{ext_y}"
+            if mode == "extend" and letak == "custom":
+                pos = custom_position(e) or pos
+            rules.append(rule(e, mode=native(e), position=pos, scale=1, mirror=""))
+            x += dims(e)[0]
     text = "-- Dibuat otomatis oleh custom/scripts/display-mode.py, jangan diedit.\n" + "\n".join(rules) + "\n"
     try:
         with open(RULES) as f:
@@ -108,14 +186,22 @@ def menu():
         subprocess.run(["notify-send", "-a", "Display", "Tidak ada monitor eksternal",
                         "Colok HDMI dulu untuk pilih mode tampilan."])
         return
-    cur = get_mode()
+    cur, cur_letak = get_mode(), get_letak()
     labels = [("● " if k == cur else "   ") + v for k, v in MODES.items()]
+    labels += [("● " if k == cur_letak else "   ") + v for k, v in LETAK.items()]
     pick = subprocess.run(["fuzzel", "--dmenu", "--prompt", "Tampilan: ",
                            "--lines", str(len(labels))],
                           input="\n".join(labels), capture_output=True, text=True).stdout.strip()
     for k, v in MODES.items():
         if pick.endswith(v):
             set_mode(k)
+            return
+    for k, v in LETAK.items():
+        if pick.endswith(v):
+            if get_mode() != "extend":
+                set_mode("extend")  # letak hanya berarti saat dua layar aktif
+            set_letak(k)
+            return
 
 
 def daemon():
@@ -144,5 +230,7 @@ if __name__ == "__main__":
         daemon()
     elif cmd == "set" and len(sys.argv) > 2 and sys.argv[2] in MODES:
         set_mode(sys.argv[2])
+    elif cmd == "letak" and len(sys.argv) > 2 and sys.argv[2] in LETAK:
+        set_letak(sys.argv[2])
     else:
         menu()

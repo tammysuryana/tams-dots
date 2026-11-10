@@ -97,13 +97,17 @@ Item {
     }
 
     function commitPosition(idx, newX, newY) {
-        const normalized = computeNormalized(monitorConfig.monitors, idx, newX, newY)
-        monitorConfig.monitors = normalized
+        const before = monitorConfig.monitors
+        const normalized = computeNormalized(before, idx, newX, newY)
         root.previewPositions = {}
         for (let i = 0; i < normalized.length; i++) {
+            // Dicatat sebagai perubahan tertunda supaya ikut tersimpan ke monitors.lua
+            // (dulu save() dipanggil tanpa index, jadi seretan tidak pernah tersimpan).
+            if (normalized[i].x !== before[i].x || normalized[i].y !== before[i].y)
+                monitorConfig.updateMonitor(i, { x: normalized[i].x, y: normalized[i].y })
             monitorConfig.applyMonitor(normalized[i])
         }
-        monitorConfig.save()
+        monitorConfig.saveAll()
     }
 
     Rectangle {
