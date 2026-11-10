@@ -12,13 +12,16 @@ AbstractQuickPanel {
     Layout.alignment: Qt.AlignHCenter
     implicitWidth: buttonGroup.implicitWidth
     implicitHeight: buttonGroup.implicitHeight
-    color: "transparent"
+    // Latar modul selebar sidebar, tombol di tengah (ala Control Center)
+    radius: 18
+    color: Appearance.colors.colLayer1
 
     ButtonGroup {
         id: buttonGroup
-        spacing: 5
-        padding: 5
-        color: Appearance.colors.colLayer1
+        anchors.centerIn: parent
+        spacing: 10
+        padding: 12
+        color: "transparent"
 
         NetworkToggle {
             altAction: () => {
@@ -28,6 +31,16 @@ AbstractQuickPanel {
         BluetoothToggle {
             altAction: () => {
                 root.openBluetoothDialog();
+            }
+        }
+        AudioOutputToggle {
+            altAction: () => {
+                root.openAudioOutputDialog();
+            }
+        }
+        MicToggle {
+            altAction: () => {
+                root.openAudioInputDialog();
             }
         }
         NightLight {}
