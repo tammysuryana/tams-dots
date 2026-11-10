@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import Quickshell
 import QtQuick
 import qs
 import qs.modules.common
@@ -28,8 +29,17 @@ Item {
     required property var wallpaperItem
     required property bool wallpaperSafetyTriggered
 
+    // Layar "rumah" widget saat screenList kosong: panel laptop (eDP/LVDS/DSI) kalau sedang aktif,
+    // kalau tidak (mis. mode "Hanya HDMI") layar pertama. Dengan 2-3 layar, widget cukup di satu
+    // layar saja, tidak digandakan ke layar eksternal. Isi screenList untuk memilih manual.
+    readonly property string homeScreenName: {
+        const screens = Quickshell.screens;
+        const internal = screens.find(s => /^(eDP|LVDS|DSI)/i.test(s.name));
+        return (internal ?? screens[0])?.name ?? "";
+    }
     readonly property bool onThisScreen: Config.options.background.screenList.length === 0
-        || Config.options.background.screenList.includes(root.screen.name)
+        ? root.screen.name === root.homeScreenName
+        : Config.options.background.screenList.includes(root.screen.name)
 
     Repeater {
         model: [
