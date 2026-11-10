@@ -84,6 +84,7 @@ curl
 wget
 git
 unzip
+zip
 rsync
 ripgrep
 jq

@@ -8,6 +8,7 @@ require("hyprland/services")
 
 -- Environment variables --
 require("hyprland/env")
+require("hyprland/gpu") -- GPU utama otomatis untuk laptop dua GPU
 if is_file_exists(HOME .. "/.config/hypr/custom/env.lua") then
     require("custom/env")
 end

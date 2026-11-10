@@ -15,6 +15,7 @@ One command installs everything.
 | ✅ Intel / AMD laptops & desktops (64-bit) | Fully supported |
 | ✅ Intel, AMD, NVIDIA GTX 16xx / RTX and newer GPUs | Drivers installed automatically |
 | ⚠️ Older NVIDIA (GTX 10xx and below) | Works, install the driver manually ([wiki](https://wiki.archlinux.org/title/NVIDIA)) |
+| ✅ Dual-GPU laptops (Intel/AMD + NVIDIA) | The primary GPU is picked automatically at login: whichever drives the connected display (laptop panel, or the external screen when plugged in), so nothing stutters |
 | ✅ Arch Linux, CachyOS, EndeavourOS and other Arch-based distros | Tested on CachyOS |
 | ⚠️ Intel Macs (before late 2020) | Works, Wi-Fi/keyboard/trackpad may need extra drivers |
 | 🧪 Apple Silicon M1/M2 via [Asahi Arch Linux ARM](https://asahi-alarm.org) | Experimental, untested; packages unavailable on ARM are skipped |

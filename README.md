@@ -33,6 +33,7 @@ Cukup satu perintah untuk memasang semuanya.
 | ✅ Laptop & PC desktop Intel / AMD (64-bit) | Didukung penuh |
 | ✅ Kartu grafis Intel, AMD, NVIDIA seri GTX 16xx / RTX ke atas | Driver dipasang otomatis |
 | ⚠️ NVIDIA lama (GTX 10xx ke bawah) | Bisa, tapi driver dipasang manual ([wiki NVIDIA](https://wiki.archlinux.org/title/NVIDIA)) |
+| ✅ Laptop dua GPU (Intel/AMD + NVIDIA) | GPU utama dipilih otomatis saat login: yang memegang layar tersambung (panel laptop, atau layar eksternal kalau sedang dicolok), supaya tidak patah-patah |
 | ✅ Monitor apa saja, 1 atau lebih | Otomatis memakai resolusi terbaik |
 | ✅ Distro: **Arch Linux**, **CachyOS**, **EndeavourOS**, dan turunan Arch lainnya | Diuji di CachyOS |
 | ⚠️ Mac Intel (sebelum akhir 2020) | Bisa, tapi WiFi/keyboard/touchpad sering butuh driver tambahan |
