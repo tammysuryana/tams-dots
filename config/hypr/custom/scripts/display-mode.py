@@ -209,6 +209,11 @@ def apply(mode):
     with open(RULES, "w") as f:
         f.write(text)
     hyprctl("reload")
+    # Live wallpaper: nyalakan untuk layar baru / sesuaikan crop-fit kalau layar diputar.
+    restore = os.path.expanduser("~/.config/hypr/custom/scripts/__restore_video_wallpaper.sh")
+    if os.access(restore, os.X_OK):
+        subprocess.Popen(["bash", "-c", f"sleep 1.5; '{restore}'"],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
 
 
 def set_mode(mode):
