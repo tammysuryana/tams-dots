@@ -155,6 +155,73 @@ VIDEO_OPTS="no-audio loop hwdec=auto scale=bilinear interpolation=no video-sync=
 MPV_SOCKET_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 MPV_SOCKET_PREFIX="$MPV_SOCKET_DIR/mpvpaper-"
 
+# Live wallpaper yang lebih besar dari layar (mis. 4K 60fps di layar 1080p) dibuat ulang
+# seukuran layar terbesar dan maksimal LIVE_WALL_MAX_FPS, lalu disimpan di cache.
+# Dekode, scaling, dan blit antar-GPU jadi jauh lebih ringan; file asli tidak disentuh.
+# Matikan dengan LIVE_WALL_OPTIMIZE=0, ubah batas fps lewat LIVE_WALL_MAX_FPS.
+LIVE_WALL_OPTIMIZE="${LIVE_WALL_OPTIMIZE:-1}"
+LIVE_WALL_MAX_FPS="${LIVE_WALL_MAX_FPS:-30}"
+LIVE_WALL_CACHE="$CACHE_DIR/live-wallpaper"
+
+live_wall_target_size() {
+    # Layar terbesar dalam piksel fisik: "lebar tinggi"
+    hyprctl monitors -j 2>/dev/null | jq -r 'max_by(.width * .height) | "\(.width) \(.height)"' 2>/dev/null
+}
+
+live_wall_encode() {
+    # $1 sumber, $2 keluaran, $3 filter video. Coba NVENC, lalu VA-API, lalu libx264.
+    local src="$1" out="$2" vf="$3" dev
+    local base=(-y -hide_banner -loglevel error -nostdin)
+    ffmpeg "${base[@]}" -i "$src" -an -vf "$vf,format=yuv420p" -c:v h264_nvenc -preset p4 -rc vbr -cq 27 -b:v 0 -movflags +faststart "$out" 2>/dev/null && return 0
+    for dev in /dev/dri/renderD*; do
+        [ -e "$dev" ] || continue
+        ffmpeg "${base[@]}" -vaapi_device "$dev" -i "$src" -an -vf "$vf,format=nv12,hwupload" -c:v h264_vaapi -qp 25 -movflags +faststart "$out" 2>/dev/null && return 0
+    done
+    ffmpeg "${base[@]}" -i "$src" -an -vf "$vf,format=yuv420p" -c:v libx264 -preset veryfast -crf 25 -movflags +faststart "$out" 2>/dev/null
+}
+
+optimize_live_wallpaper() {
+    # Mengembalikan path video yang akan diputar: hasil optimasi di cache, atau sumber asli.
+    local src="$1"
+    [[ "$LIVE_WALL_OPTIMIZE" == "1" ]] || { echo "$src"; return; }
+    command -v ffprobe >/dev/null && command -v ffmpeg >/dev/null || { echo "$src"; return; }
+
+    local probe sw sh sfps
+    probe=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate -of default=noprint_wrappers=1 "$src" 2>/dev/null) || { echo "$src"; return; }
+    sw=$(sed -n 's/^width=//p' <<<"$probe"); sh=$(sed -n 's/^height=//p' <<<"$probe")
+    sfps=$(sed -n 's/^r_frame_rate=//p' <<<"$probe" | awk -F/ '{ if ($2 > 0) printf "%.0f", $1 / $2; else printf "%.0f", $1 }')
+    [[ "$sw" =~ ^[0-9]+$ && "$sh" =~ ^[0-9]+$ && "$sfps" =~ ^[0-9]+$ ]] || { echo "$src"; return; }
+
+    local tw th
+    read -r tw th < <(live_wall_target_size)
+    [[ "$tw" =~ ^[0-9]+$ && "$th" =~ ^[0-9]+$ ]] || { echo "$src"; return; }
+    local tfps="$LIVE_WALL_MAX_FPS"
+    (( sfps < tfps )) && tfps="$sfps"
+
+    # Sudah muat di layar dan fps tidak melebihi batas: pakai apa adanya
+    if (( sw <= tw && sh <= th && sfps <= LIVE_WALL_MAX_FPS )); then echo "$src"; return; fi
+
+    local key out tmp
+    key=$(printf '%s|%s' "$src" "$(stat -c '%s|%Y' "$src" 2>/dev/null)" | md5sum | cut -c1-10)
+    out="$LIVE_WALL_CACHE/$(basename "${src%.*}")-${key}-${tw}x${th}p${tfps}.mp4"
+    [[ -s "$out" ]] && { echo "$out"; return; }
+
+    mkdir -p "$LIVE_WALL_CACHE"
+    notify-send -a "Wallpaper switcher" "Mengoptimalkan live wallpaper" \
+        "${sw}x${sh} ${sfps}fps → maks ${tw}x${th} ${tfps}fps supaya ringan. Tunggu sebentar…" 2>/dev/null
+    tmp="$out.tmp.mp4"
+    if live_wall_encode "$src" "$tmp" "scale=${tw}:${th}:force_original_aspect_ratio=decrease:force_divisible_by=2,fps=${tfps}"; then
+        mv -f "$tmp" "$out"
+        # Buang hasil lama dari sumber yang sama (ukuran layar / batas fps berubah)
+        find "$LIVE_WALL_CACHE" -maxdepth 1 -name "$(basename "${src%.*}")-${key}-*.mp4" ! -name "$(basename "$out")" -delete 2>/dev/null
+        echo "$out"
+    else
+        rm -f "$tmp"
+        notify-send -a "Wallpaper switcher" -c "im.error" "Gagal mengoptimalkan live wallpaper" "Memutar file asli." 2>/dev/null
+        echo "$src"
+    fi
+}
+
 is_video() {
     local extension="${1##*.}"
     [[ "$extension" == "mp4" || "$extension" == "webm" || "$extension" == "mkv" || "$extension" == "avi" || "$extension" == "mov" ]] && return 0 || return 1
@@ -282,7 +349,8 @@ switch() {
             if [[ -z "$colors_only_flag" ]]; then
                 set_wallpaper_path "$imgpath"
 
-                local video_path="$imgpath"
+                local video_path
+                video_path=$(optimize_live_wallpaper "$imgpath")
                 monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
                 rm -f "$MPV_SOCKET_PREFIX"*.sock
                 for monitor in $monitors; do
