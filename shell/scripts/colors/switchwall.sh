@@ -256,7 +256,10 @@ mpv_opts_for_monitor() {
                 | ([$uw / $vw, $uh / $vh] | max) as $s
                 | (($vw * $s - $uw) / 2) as $ox | (($vh * $s - $uh) / 2) as $oy
                 | ($ms | map(select(.name == $m)) | .[0]) as $mon
-                | "\((($mon | lw) / $s | floor))x\((($mon | lh) / $s | floor))+\((($mon.x - $ux + $ox) / $s | floor))+\((($mon.y - $uy + $oy) / $s | floor))"
+                # dibulatkan & dijepit ke batas video: pembulatan float bisa memberi -1 dan mpv menolak crop negatif
+                | def cl(v; hi): ([0, ([v, hi] | min)] | max | round);
+                  cl(($mon | lw) / $s; $vw) as $cw | cl(($mon | lh) / $s; $vh) as $ch
+                | "\($cw)x\($ch)+\(cl(($mon.x - $ux + $ox) / $s; $vw - $cw))+\(cl(($mon.y - $uy + $oy) / $s; $vh - $ch))"
               end' 2>/dev/null)
     fi
     if [[ -n "$crop" ]]; then echo "$VIDEO_OPTS video-crop=$crop"; else echo "$VIDEO_OPTS"; fi

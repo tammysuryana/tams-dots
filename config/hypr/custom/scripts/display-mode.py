@@ -111,8 +111,16 @@ def chosen_mode(m):
 
 def dims(m):
     # Ukuran LOGIS (piksel mode / skala, lebar-tinggi ditukar kalau diputar 90/270), karena
-    # posisi Hyprland dihitung dalam piksel logis. Monitor yang disabled melapor 0x0, jadi
-    # ukuran diambil dari mode, bukan dari width/height.
+    # posisi Hyprland dihitung dalam piksel logis.
+    # Monitor yang sedang menyala: pakai nilai NYATA dari hyprctl (Hyprland bisa mengganti skala
+    # yang tidak valid, mis. 0.75 -> 0.6667, sehingga nilai di monitors.lua tidak sama dengan
+    # yang terpasang). Monitor yang disabled melapor 0x0, jadi pakai mode + pilihan Settings.
+    if not m.get("disabled") and m.get("width", 0) > 0 and m.get("height", 0) > 0:
+        w, h = m["width"], m["height"]
+        if int(m.get("transform", 0)) % 2 == 1:
+            w, h = h, w
+        sc = m.get("scale") or 1
+        return round(w / sc), round(h / sc)
     st = settings_of(m)
     try:
         w, h = (int(v) for v in chosen_mode(m).split("@")[0].split("x"))
