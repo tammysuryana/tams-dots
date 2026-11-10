@@ -80,24 +80,21 @@ Variants {
 
         // Decode wallpapers at screen resolution. Uploading a 5K+ image and its mipmaps to the GPU
         // stalls the render thread, and the GUI thread with it while an animation is running.
-        readonly property size wallpaperSourceSize: Qt.size(Math.ceil(modelData.width * modelData.devicePixelRatio),
-            Math.ceil(modelData.height * modelData.devicePixelRatio))
+        readonly property size wallpaperSourceSize: Qt.size(Math.ceil(spanRect.width * modelData.devicePixelRatio),
+            Math.ceil(spanRect.height * modelData.devicePixelRatio))
 
-        // Orientasi layar beda dengan orientasi gambar (mis. monitor diputar tegak, wallpaper lebar):
-        // gambar ditampilkan utuh di tengah (fit) di atas latar blur dari gambar itu sendiri, bukan
-        // di-crop. Layar yang orientasinya cocok tetap crop penuh.
-        // Rasio gambar dibaca dari probe kecil (implicitWidth Image berubah mengikuti fillMode,
-        // jadi tidak bisa dipakai langsung: binding loop).
-        readonly property bool wallpaperOrientationMismatch: aspectProbe.status === Image.Ready
-            && aspectProbe.implicitWidth > 0 && aspectProbe.implicitHeight > 0
-            && ((modelData.width >= modelData.height) !== (aspectProbe.implicitWidth >= aspectProbe.implicitHeight))
-        Image {
-            id: aspectProbe
-            source: wallpaper.source
-            sourceSize: Qt.size(64, 64)
-            asynchronous: true
-            visible: false
-            width: 1; height: 1
+        // Wallpaper menyambung antar layar (ala Windows "Span"): satu gambar seukuran gabungan
+        // semua layar, tiap layar menampilkan bagiannya sendiri. spanRect = letak & ukuran gambar
+        // relatif terhadap layar ini. Tanpa span: persis seukuran layar.
+        readonly property bool spanWallpaper: (Config.options.background.spanWallpaper ?? false) && Quickshell.screens.length > 1
+        readonly property rect spanRect: {
+            if (!bgRoot.spanWallpaper) return Qt.rect(0, 0, modelData.width, modelData.height)
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+            for (const s of Quickshell.screens) {
+                minX = Math.min(minX, s.x); minY = Math.min(minY, s.y)
+                maxX = Math.max(maxX, s.x + s.width); maxY = Math.max(maxY, s.y + s.height)
+            }
+            return Qt.rect(minX - modelData.x, minY - modelData.y, maxX - minX, maxY - minY)
         }
 
         property real transitionProgress: 1.0
@@ -242,36 +239,11 @@ Variants {
                 NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
             }
 
-            // Latar blur untuk mode fit (lihat wallpaperOrientationMismatch)
-            Loader {
-                anchors.fill: parent
-                active: bgRoot.wallpaperOrientationMismatch && !bgRoot.videoRevealed
-                visible: active
-                sourceComponent: Item {
-                    Image {
-                        id: fitBackdropSource
-                        anchors.fill: parent
-                        source: wallpaper.source
-                        fillMode: Image.PreserveAspectCrop
-                        sourceSize: Qt.size(Math.ceil(bgRoot.wallpaperSourceSize.width / 4), Math.ceil(bgRoot.wallpaperSourceSize.height / 4))
-                        cache: true
-                        smooth: true
-                        visible: false
-                    }
-                    FastBlur {
-                        anchors.fill: parent
-                        source: fitBackdropSource
-                        radius: 64
-                        cached: true
-                    }
-                    Rectangle { anchors.fill: parent; color: "black"; opacity: 0.35 }
-                }
-            }
-
             Image {
                 id: previousWallpaper
-                anchors.fill: parent
-                fillMode: bgRoot.wallpaperOrientationMismatch ? Image.PreserveAspectFit : Image.PreserveAspectCrop
+                x: bgRoot.spanRect.x; y: bgRoot.spanRect.y
+                width: bgRoot.spanRect.width; height: bgRoot.spanRect.height
+                fillMode: Image.PreserveAspectCrop
                 // Same size as `wallpaper` so this synchronous Image reuses its cached pixmap
                 sourceSize: bgRoot.wallpaperSourceSize
                 cache: true
@@ -284,8 +256,9 @@ Variants {
 
             StyledImage {
                 id: wallpaper
-                anchors.fill: parent
-                fillMode: bgRoot.wallpaperOrientationMismatch ? Image.PreserveAspectFit : Image.PreserveAspectCrop
+                x: bgRoot.spanRect.x; y: bgRoot.spanRect.y
+                width: bgRoot.spanRect.width; height: bgRoot.spanRect.height
+                fillMode: Image.PreserveAspectCrop
                 sourceSize: bgRoot.wallpaperSourceSize
                 cache: true
                 smooth: true

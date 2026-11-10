@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
+import Quickshell
 import Quickshell.Hyprland
 
 
@@ -198,6 +199,18 @@ ContentPage {
                     checked: Config.options.background.enableWallpaperPreview
                     onCheckedChanged: {
                         Config.options.background.enableWallpaperPreview = checked;
+                    }
+                }
+
+                ConfigSwitch {
+                    buttonIcon: "panorama_horizontal"
+                    text: Translation.tr("Span wallpaper across screens")
+                    checked: Config.options.background.spanWallpaper
+                    onCheckedChanged: {
+                        if (checked === Config.options.background.spanWallpaper) return;
+                        Config.options.background.spanWallpaper = checked;
+                        // Live wallpaper: potongan per layar dihitung ulang dari config yang baru tersimpan
+                        Quickshell.execDetached(["bash", "-c", "sleep 1; r=\"$HOME/.config/hypr/custom/scripts/__restore_video_wallpaper.sh\"; [ -x \"$r\" ] && \"$r\" --restart"]);
                     }
                 }
 

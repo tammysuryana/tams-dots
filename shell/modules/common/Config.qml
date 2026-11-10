@@ -253,6 +253,7 @@ Singleton {
             property JsonObject background: JsonObject {
                 property string lockWall: ""
                 property bool widgetsLocked: false
+                property bool spanWallpaper: false // satu wallpaper menyambung ke semua layar (ala Windows Span)
                 property JsonObject collage: JsonObject {
                     property bool enable: false
                     property int gap: 30
