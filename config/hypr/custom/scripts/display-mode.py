@@ -87,13 +87,50 @@ def is_laptop(m):
     return m["name"].startswith(LAPTOP_PREFIX)
 
 
-def dims(m):
-    # Ukuran dari mode native (monitor yang sedang disabled melapor 0x0 di width/height).
+def settings_of(m):
+    """Pilihan dari Settings (monitors.lua): mode, scale, transform. Blok bernama didahulukan."""
+    blocks = lua_blocks()
+    b = blocks.get(m["name"]) or blocks.get("desc:" + m["description"]) or {}
+    out = {}
+    if re.fullmatch(r"\d+x\d+@[\d.]+", b.get("mode", "")):
+        out["mode"] = b["mode"]
     try:
-        w, h = native(m).split("@")[0].split("x")
-        return int(w), int(h)
+        sc = float(b.get("scale", ""))
+        if 0.5 <= sc <= 4:
+            out["scale"] = int(sc) if sc == int(sc) else sc
     except ValueError:
-        return m["width"], m["height"]
+        pass
+    if b.get("transform", "") in ("1", "2", "3", "4", "5", "6", "7"):
+        out["transform"] = int(b["transform"])
+    return out
+
+
+def chosen_mode(m):
+    return settings_of(m).get("mode") or native(m)
+
+
+def dims(m):
+    # Ukuran LOGIS (piksel mode / skala, lebar-tinggi ditukar kalau diputar 90/270), karena
+    # posisi Hyprland dihitung dalam piksel logis. Monitor yang disabled melapor 0x0, jadi
+    # ukuran diambil dari mode, bukan dari width/height.
+    st = settings_of(m)
+    try:
+        w, h = (int(v) for v in chosen_mode(m).split("@")[0].split("x"))
+    except ValueError:
+        w, h = m["width"], m["height"]
+    if st.get("transform", 0) % 2 == 1:
+        w, h = h, w
+    sc = st.get("scale", 1)
+    return round(w / sc), round(h / sc)
+
+
+def extra_fields(m):
+    """scale/transform pilihan Settings untuk dimasukkan ke rule."""
+    st = settings_of(m)
+    out = {"scale": st.get("scale", 1)}
+    if "transform" in st:
+        out["transform"] = st["transform"]
+    return out
 
 
 def get_letak():
@@ -146,10 +183,10 @@ def apply(mode):
     if lap:
         if mode in ("laptop", "extend"):
             # mirror = "" wajib, kalau tidak sisa mode mirror sebelumnya nempel terus.
-            rules.append(rule(lap, mode=native(lap), position=lap_pos, scale=1, mirror=""))
+            rules.append(rule(lap, mode=chosen_mode(lap), position=lap_pos, mirror="", **extra_fields(lap)))
         elif mode == "mirror":
-            rules.append(rule(lap, mode=native(lap), position="auto", scale=1,
-                              mirror=ext[0]["name"]))
+            rules.append(rule(lap, mode=chosen_mode(lap), position="auto", mirror=ext[0]["name"],
+                              **extra_fields(lap)))
         else:
             rules.append(rule(lap, disabled=True))
     x = ext_x0
@@ -160,7 +197,7 @@ def apply(mode):
             pos = f"{x}x{ext_y}"
             if mode == "extend" and letak == "custom":
                 pos = custom_position(e) or pos
-            rules.append(rule(e, mode=native(e), position=pos, scale=1, mirror=""))
+            rules.append(rule(e, mode=chosen_mode(e), position=pos, mirror="", **extra_fields(e)))
             x += dims(e)[0]
     text = "-- Dibuat otomatis oleh custom/scripts/display-mode.py, jangan diedit.\n" + "\n".join(rules) + "\n"
     try:

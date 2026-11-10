@@ -13,8 +13,10 @@ Item {
     property var previewPositions: ({})
     property bool dragHasOverlap: false
 
-    implicitHeight: 220
+    implicitHeight: 240
 
+    // Batas peta dari posisi yang SUDAH tersimpan saja. Kalau ikut posisi pratinjau, skala dan
+    // titik nol peta berubah terus selama kotak diseret, sehingga kotak "lari" dari kursor.
     property var bounds: {
         let minX = Infinity, minY = Infinity
         let maxX = -Infinity, maxY = -Infinity
@@ -24,8 +26,8 @@ Item {
             if (m.disabled) continue
             const w = monitorConfig.logicalWidth(m)
             const h = monitorConfig.logicalHeight(m)
-            const px = previewPositions[m.name]?.x ?? m.x
-            const py = previewPositions[m.name]?.y ?? m.y
+            const px = m.x
+            const py = m.y
             minX = Math.min(minX, px)
             minY = Math.min(minY, py)
             maxX = Math.max(maxX, px + w)
@@ -116,6 +118,7 @@ Item {
         color: Appearance.colors.colLayer1
         border.width: 1
         border.color: Appearance.colors.colLayer0Border
+        clip: true   // kotak yang diseret keluar peta tidak menimpa isi lain
 
         Item {
             id: canvas

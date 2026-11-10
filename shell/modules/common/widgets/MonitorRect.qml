@@ -105,25 +105,41 @@ Rectangle {
         }
     }
 
+    // Posisi tempel untuk titik jatuh (px, py): kotak selalu menempel ke tepi layar lain yang
+    // terdekat (kanan/kiri/bawah/atas) tanpa celah dan tanpa tumpang tindih, lalu disejajarkan
+    // ke atas/tengah/bawah (atau kiri/tengah/kanan) kalau jaraknya di bawah snapThreshold.
+    // Hasil berupa koordinat logis Hyprland. Tanpa layar lain: posisi apa adanya.
     function snapPosition(px, py) {
-        let sx = px, sy = py
-        const thresh = snapThreshold / scaleFactor
+        const w = logW, h = logH
+        const tol = snapThreshold / scaleFactor
+        const others = []
         for (let i = 0; i < allMonitors.length; i++) {
-            if (i === monitorIndex) continue
-            const other = allMonitors[i]
-            if (other.disabled) continue
-            const ow = monitorConfig.logicalWidth(other)
-            const oh = monitorConfig.logicalHeight(other)
-            if (Math.abs(px - other.x) < thresh)                 sx = other.x
-            if (Math.abs(px - (other.x + ow)) < thresh)          sx = other.x + ow
-            if (Math.abs((px + logW) - other.x) < thresh)        sx = other.x - logW
-            if (Math.abs((px + logW) - (other.x + ow)) < thresh) sx = other.x + ow - logW
-            if (Math.abs(py - other.y) < thresh)                 sy = other.y
-            if (Math.abs(py - (other.y + oh)) < thresh)          sy = other.y + oh
-            if (Math.abs((py + logH) - other.y) < thresh)        sy = other.y - logH
-            if (Math.abs((py + logH) - (other.y + oh)) < thresh) sy = other.y + oh - logH
+            if (i === monitorIndex || allMonitors[i].disabled) continue
+            const o = allMonitors[i]
+            others.push({ x: o.x, y: o.y, w: monitorConfig.logicalWidth(o), h: monitorConfig.logicalHeight(o) })
         }
-        return Qt.point(sx, sy)
+        if (others.length === 0) return Qt.point(Math.round(px), Math.round(py))
+
+        const overlaps = (x, y) => others.some(o => x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y)
+        const snapTo = (v, targets) => { for (const t of targets) if (Math.abs(v - t) < tol) return t; return v }
+        let cands = []
+        for (const o of others) {
+            // Harus bersinggungan minimal 10% supaya kursor bisa menyeberang antar layar
+            const minY = o.y - h + Math.min(h, o.h) * 0.1, maxY = o.y + o.h - Math.min(h, o.h) * 0.1
+            const minX = o.x - w + Math.min(w, o.w) * 0.1, maxX = o.x + o.w - Math.min(w, o.w) * 0.1
+            const cy = Math.max(minY, Math.min(maxY, py)), cx = Math.max(minX, Math.min(maxX, px))
+            const alignY = [o.y, o.y + (o.h - h) / 2, o.y + o.h - h]
+            const alignX = [o.x, o.x + (o.w - w) / 2, o.x + o.w - w]
+            cands.push({ x: o.x + o.w, y: snapTo(cy, alignY) })   // kanan o
+            cands.push({ x: o.x - w,   y: snapTo(cy, alignY) })   // kiri o
+            cands.push({ x: snapTo(cx, alignX), y: o.y + o.h })   // bawah o
+            cands.push({ x: snapTo(cx, alignX), y: o.y - h })     // atas o
+        }
+        cands = cands.map(c => ({ x: Math.round(c.x), y: Math.round(c.y) })).filter(c => !overlaps(c.x, c.y))
+        if (cands.length === 0) return Qt.point(Math.round(px), Math.round(py))
+        const d = c => Math.hypot(c.x - px, c.y - py)
+        const best = cands.reduce((a, b) => d(b) < d(a) ? b : a)
+        return Qt.point(best.x, best.y)
     }
 
     MouseArea {
