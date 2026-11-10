@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Atur layar ala Windows (Win+P): laptop saja / eksternal saja / extend / mirror,
-# plus letak layar eksternal saat extend (di atas / bawah / kiri / kanan laptop).
+# Letak layar eksternal saat extend diatur dengan menyeret di Settings → Hyprland → Displays.
 #   display-mode.py daemon     -> jalan di background, terapkan mode tiap
 #                                 monitor dicolok/dicabut atau config di-reload
 #   display-mode.py menu       -> munculkan menu pilihan (fuzzel)
@@ -223,21 +223,16 @@ def menu():
         subprocess.run(["notify-send", "-a", "Display", "Tidak ada monitor eksternal",
                         "Colok HDMI dulu untuk pilih mode tampilan."])
         return
-    cur, cur_letak = get_mode(), get_letak()
+    # Hanya mode. Letak layar eksternal diatur dengan menyeret di Settings → Hyprland → Displays
+    # (otomatis jadi letak "custom"); CLI `letak` tetap ada untuk skrip.
+    cur = get_mode()
     labels = [("● " if k == cur else "   ") + v for k, v in MODES.items()]
-    labels += [("● " if k == cur_letak else "   ") + v for k, v in LETAK.items()]
     pick = subprocess.run(["fuzzel", "--dmenu", "--prompt", "Tampilan: ",
                            "--lines", str(len(labels))],
                           input="\n".join(labels), capture_output=True, text=True).stdout.strip()
     for k, v in MODES.items():
         if pick.endswith(v):
             set_mode(k)
-            return
-    for k, v in LETAK.items():
-        if pick.endswith(v):
-            if get_mode() != "extend":
-                set_mode("extend")  # letak hanya berarti saat dua layar aktif
-            set_letak(k)
             return
 
 
