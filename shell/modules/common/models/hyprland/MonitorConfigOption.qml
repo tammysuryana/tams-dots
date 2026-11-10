@@ -164,12 +164,17 @@ NestableObject {
         root.save(index)
     }
 
+    // Ukuran LOGIS seperti yang dipakai Hyprland untuk posisi: piksel mode dibagi skala,
+    // lebar-tinggi ditukar bila diputar 90/270. Dulu skala diabaikan, sehingga layar dengan
+    // skala != 100% digambar salah ukuran di kanvas dan hasil seretan bisa tumpang tindih.
     function logicalWidth(m) {
-        return (m.transform === 1 || m.transform === 3) ? m.height : m.width
+        const px = (m.transform === 1 || m.transform === 3) ? m.height : m.width
+        return Math.round(px / (m.scale > 0 ? m.scale : 1))
     }
 
     function logicalHeight(m) {
-        return (m.transform === 1 || m.transform === 3) ? m.width : m.height
+        const px = (m.transform === 1 || m.transform === 3) ? m.width : m.height
+        return Math.round(px / (m.scale > 0 ? m.scale : 1))
     }
 
     Process {
