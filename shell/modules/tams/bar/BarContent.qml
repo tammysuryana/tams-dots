@@ -26,6 +26,8 @@ Item {
     readonly property real centerPillX: centerPill.x
     readonly property real centerPillWidth: centerPill.width
     readonly property bool isPanel: Config.options.bar.cornerStyle === 5
+    // Gaya menu bar macOS: Panel + grup transparan = satu strip tembus pandang, ikon rata
+    readonly property bool macFlat: root.isPanel && Config.options.bar.borderless === "transparent"
     readonly property var diLeftWidgets:  filterLayout(Config.options.bar.dynamicIsland.leftWidgets ?? [])
     readonly property var diRightWidgets: filterLayout(Config.options.bar.dynamicIsland.rightWidgets ?? [])
 
@@ -83,10 +85,11 @@ Item {
         id: barBackground
         anchors.fill: parent
         anchors.margins: Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0
+        readonly property color baseColor: Config.options.bar.followFrameColor
+            ? Appearance.getColorFromName(Config.options.bar.frameColor)
+            : Appearance.colors.colUiBackground
         color: (!centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle !== 2 && !root.useTabWrapper)
-            ? (Config.options.bar.followFrameColor
-                ? Appearance.getColorFromName(Config.options.bar.frameColor)
-                : Appearance.colors.colUiBackground)
+            ? (root.macFlat ? ColorUtils.applyAlpha(baseColor, Math.min(baseColor.a, 0.72)) : baseColor)
             : "transparent"
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
         border.width: (!centerOnly && Config.options.bar.cornerStyle === 1) ? 1 : 0
@@ -240,8 +243,8 @@ Item {
                                 Layout.fillHeight: true
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
-                                    if (item && item.hasOwnProperty("mirrored"))
-                                        item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
+                                    if (item && item.hasOwnProperty("mirrored")) try {
+                                        item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index) } catch (e) {} // readonly di sebagian widget
                                 }
                             }
                         }
@@ -265,7 +268,8 @@ Item {
                 id: leftRow
                 visible: !root.useTabWrapper
                 anchors.fill: parent
-                spacing: Config.options.bar.borderless === "transparent" ? -7
+                spacing: root.macFlat ? 4
+                    : Config.options.bar.borderless === "transparent" ? -7
                     : (Config.options?.bar.borderless === "segmented" && root.isPanel) ? 3
                     : Config.options?.bar.borderless === "segmented" ? -1
                     : root.isPanel ? 4 : 2
@@ -286,8 +290,8 @@ Item {
                             Layout.fillHeight: true
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
-                                if (item && item.hasOwnProperty("mirrored"))
-                                    item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
+                                if (item && item.hasOwnProperty("mirrored")) try {
+                                    item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index) } catch (e) {} // readonly di sebagian widget
                             }
                         }
                     }
@@ -301,8 +305,8 @@ Item {
                         Layout.alignment: Qt.AlignVCenter
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
-                            if (item && item.hasOwnProperty("mirrored"))
-                                item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
+                            if (item && item.hasOwnProperty("mirrored")) try {
+                                item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index) } catch (e) {} // readonly di sebagian widget
                         }
                     }
                 }
@@ -386,8 +390,8 @@ Item {
                                 Layout.fillHeight: true
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
-                                    if (item && item.hasOwnProperty("mirrored"))
-                                        item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
+                                    if (item && item.hasOwnProperty("mirrored")) try {
+                                        item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index) } catch (e) {} // readonly di sebagian widget
                                 }
                             }
                         }
@@ -411,7 +415,8 @@ Item {
                 id: middleRow
                 visible: !root.useTabWrapper
                 anchors.fill: parent
-                spacing: Config.options.bar.borderless === "transparent" ? -7
+                spacing: root.macFlat ? 4
+                    : Config.options.bar.borderless === "transparent" ? -7
                     : (Config.options?.bar.borderless === "segmented" && root.isPanel) ? 3
                     : Config.options?.bar.borderless === "segmented" ? -1
                     : root.isPanel ? 4 : 2
@@ -433,8 +438,8 @@ Item {
                             Layout.fillHeight: true
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
-                                if (item && item.hasOwnProperty("mirrored"))
-                                    item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
+                                if (item && item.hasOwnProperty("mirrored")) try {
+                                    item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index) } catch (e) {} // readonly di sebagian widget
                             }
                         }
                     }
@@ -447,8 +452,8 @@ Item {
                         Layout.topMargin: Config.options.bar.bottom ? -5 : 3
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
-                            if (item && item.hasOwnProperty("mirrored"))
-                                item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
+                            if (item && item.hasOwnProperty("mirrored")) try {
+                                item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index) } catch (e) {} // readonly di sebagian widget
                         }
                     }
                 }
@@ -532,7 +537,9 @@ Item {
                 id: rightRow
                 visible: !root.useTabWrapper
                 anchors.fill: parent
-                spacing: Config.options.bar.borderless === "transparent" ? -7
+                // macFlat: 0 agar jarak antar-ikon kanan sama rata (~32px)
+                spacing: root.macFlat ? 0
+                    : Config.options.bar.borderless === "transparent" ? -7
                     : (Config.options?.bar.borderless === "segmented" && root.isPanel) ? 3
                     : Config.options?.bar.borderless === "segmented" ? -1
                     : root.isPanel ? 4 : 2

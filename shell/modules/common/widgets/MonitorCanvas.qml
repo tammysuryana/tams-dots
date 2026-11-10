@@ -13,27 +13,33 @@ Item {
     property var previewPositions: ({})
     property bool dragHasOverlap: false
 
-    implicitHeight: 240
+    implicitHeight: 280
 
     // Batas peta dari posisi yang SUDAH tersimpan saja. Kalau ikut posisi pratinjau, skala dan
     // titik nol peta berubah terus selama kotak diseret, sehingga kotak "lari" dari kursor.
+    // Peta diberi ruang tetap di keempat sisi layar jangkar (panel laptop, atau layar pertama)
+    // selebar/setinggi layar lain terbesar. Dengan begitu skala dan letak jangkar di peta tidak
+    // berubah ke mana pun kotak diseret, termasuk ke kiri/atas (koordinat negatif yang lalu
+    // dinormalkan ke 0) yang dulu membuat seluruh peta melompat sesudah drop.
     property var bounds: {
-        let minX = Infinity, minY = Infinity
-        let maxX = -Infinity, maxY = -Infinity
-        const mons = monitorConfig.monitors
-        for (let i = 0; i < mons.length; i++) {
-            const m = mons[i]
-            if (m.disabled) continue
-            const w = monitorConfig.logicalWidth(m)
-            const h = monitorConfig.logicalHeight(m)
-            const px = m.x
-            const py = m.y
-            minX = Math.min(minX, px)
-            minY = Math.min(minY, py)
-            maxX = Math.max(maxX, px + w)
-            maxY = Math.max(maxY, py + h)
+        const enabled = monitorConfig.monitors.filter(m => !m.disabled)
+        if (enabled.length === 0) return { minX: 0, minY: 0, width: 1920, height: 1080 }
+        const anchor = enabled.find(m => /^(eDP|LVDS|DSI)/i.test(m.name)) ?? enabled[0]
+        const aw = monitorConfig.logicalWidth(anchor), ah = monitorConfig.logicalHeight(anchor)
+        let ew = 0, eh = 0
+        for (const m of enabled) {
+            if (m === anchor) continue
+            ew = Math.max(ew, monitorConfig.logicalWidth(m))
+            eh = Math.max(eh, monitorConfig.logicalHeight(m))
         }
-        if (minX === Infinity) return { minX: 0, minY: 0, width: 1920, height: 1080 }
+        let minX = anchor.x - ew, minY = anchor.y - eh
+        let maxX = anchor.x + aw + ew, maxY = anchor.y + ah + eh
+        for (const m of enabled) {
+            minX = Math.min(minX, m.x)
+            minY = Math.min(minY, m.y)
+            maxX = Math.max(maxX, m.x + monitorConfig.logicalWidth(m))
+            maxY = Math.max(maxY, m.y + monitorConfig.logicalHeight(m))
+        }
         return { minX, minY, width: maxX - minX, height: maxY - minY }
     }
 

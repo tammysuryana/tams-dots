@@ -256,9 +256,12 @@ Item {
                                 width: wallpaperRect.coverWidth
                                 height: wallpaperRect.coverHeight
                                 fillMode: Image.PreserveAspectCrop
-                                source: Config.options.sidebar.bannerImage !== "" 
-                                    ? Config.options.sidebar.bannerImage 
-                                    : Config.options.background.wallpaperPath
+                                // Wallpaper video: pakai thumbnail-nya, file mp4 tidak bisa dibaca sebagai gambar
+                                source: Config.options.sidebar.bannerImage !== ""
+                                    ? Config.options.sidebar.bannerImage
+                                    : (/\.(mp4|webm|mkv|avi|mov)$/i.test(Config.options.background.wallpaperPath)
+                                        ? Config.options.background.thumbnailPath
+                                        : Config.options.background.wallpaperPath)
                                 cache: false
                                 antialiasing: true
                                 sourceSize.width: wallpaperRect.width * 2
