@@ -188,12 +188,16 @@ Variants {
         }
 
         // Safety net: if the thumbnail transition never finishes, the static
-        // thumbnail keeps covering mpvpaper and the live wallpaper looks frozen
+        // thumbnail keeps covering mpvpaper and the live wallpaper looks frozen.
+        // Checked every tick while a video wallpaper is set (not a one-shot started by a
+        // binding): the one-shot version could miss a stuck state after a wallpaper switch or
+        // HDMI replug, leaving the wallpaper frozen until the shell restarted (2026-11-17).
         Timer {
             interval: 2500
-            running: bgRoot.wallpaperIsVideo && !bgRoot.videoRevealed
-                && !transitionAnim.running && !GlobalStates.screenLocked
+            repeat: true
+            running: bgRoot.wallpaperIsVideo
             onTriggered: {
+                if (bgRoot.videoRevealed || transitionAnim.running || GlobalStates.screenLocked) return
                 bgRoot.transitionPending = false
                 bgRoot.transitionProgress = 1.0
                 bgRoot.videoRevealed = true

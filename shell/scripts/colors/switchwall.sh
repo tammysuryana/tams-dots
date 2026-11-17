@@ -283,6 +283,9 @@ $(declare -f mpv_opts_for_monitor)
 # Mode "pastikan": nyalakan mpvpaper hanya untuk monitor yang belum punya, matikan yang
 # monitornya sudah hilang. Aman dipanggil berulang (saat login, colok/cabut HDMI).
 # --restart: matikan semua dulu lalu nyalakan ulang.
+# Satu per satu: colok HDMI memicu dua pemanggil sekaligus (display-mode.py + shell). Tanpa kunci
+# keduanya bisa menyalakan mpvpaper dobel untuk layar yang sama, atau saling mematikan.
+exec 9>"${MPV_SOCKET_PREFIX}restore.lock"; flock 9
 if [ "\$1" = "--restart" ]; then
     pkill -f -9 mpvpaper
     rm -f "$MPV_SOCKET_PREFIX"*.sock
@@ -295,7 +298,10 @@ for pid in \$(pgrep -x mpvpaper); do
 done
 for monitor in \$monitors; do
     opts=\$(mpv_opts_for_monitor "\$monitor" "\$VIDEO_W" "\$VIDEO_H")
-    pid=\$(pgrep -f "input-ipc-server=$MPV_SOCKET_PREFIX\$monitor.sock" | head -1)
+    pids=\$(pgrep -f "input-ipc-server=$MPV_SOCKET_PREFIX\$monitor.sock")
+    pid=\$(head -1 <<< "\$pids")
+    # Sisa dobel dari tabrakan lama: sisakan satu per layar
+    for extra in \$(tail -n +2 <<< "\$pids"); do kill -9 "\$extra" 2>/dev/null; done
     if [ -n "\$pid" ]; then
         # Sudah jalan: biarkan, kecuali potongan span-nya berubah (layar digeser/diputar, span di-toggle)
         want=\$(grep -oE 'video-crop=[^ ]+' <<< "\$opts"); have=\$(tr '\\0' ' ' < /proc/\$pid/cmdline | grep -oE 'video-crop=[^ ]+')
@@ -303,7 +309,7 @@ for monitor in \$monitors; do
         kill -9 "\$pid" 2>/dev/null
     fi
     rm -f "$MPV_SOCKET_PREFIX\$monitor.sock"
-    mpvpaper $MPVPAPER_FLAGS -o "\$opts input-ipc-server=$MPV_SOCKET_PREFIX\$monitor.sock" "\$monitor" "$video_path" &
+    mpvpaper $MPVPAPER_FLAGS -o "\$opts input-ipc-server=$MPV_SOCKET_PREFIX\$monitor.sock" "\$monitor" "$video_path" 9>&- &
     sleep 0.1
 done
 EOF

@@ -38,21 +38,33 @@ ColumnLayout {
         }
     }
 
+    // Output: per port kartu suara (Speaker / Headphones / HDMI), gaya tamsOS (services/AudioOutputs).
+    // Bila pactl tak bisa dibaca, kembali ke daftar perangkat PipeWire.
+    readonly property bool usePorts: root.isSink && AudioOutputs.outputs.length > 0
+
     StyledComboBox {
         id: deviceSelector
         Layout.fillHeight: false
         Layout.fillWidth: true
         Layout.bottomMargin: 6
-        model: root.devices.map(node => Audio.friendlyDeviceName(node))
-        currentIndex: root.devices.findIndex(item => {
-            if (root.isSink) {
-                return item.id === Pipewire.defaultAudioSink?.id
-            } else {
-                return item.id === Pipewire.defaultAudioSource?.id
-            }
-        })
+        model: root.usePorts
+            ? AudioOutputs.outputs.map(o => o.label + (o.sub ? " (" + o.sub + ")" : ""))
+            : root.devices.map(node => Audio.friendlyDeviceName(node))
+        currentIndex: {
+            if (root.usePorts) return AudioOutputs.outputs.findIndex(o => o.active)
+            return root.devices.findIndex(item => {
+                if (root.isSink) {
+                    return item.id === Pipewire.defaultAudioSink?.id
+                } else {
+                    return item.id === Pipewire.defaultAudioSource?.id
+                }
+            })
+        }
         onActivated: (index) => {
-            print(index)
+            if (root.usePorts) {
+                AudioOutputs.select(AudioOutputs.outputs[index])
+                return
+            }
             const item = root.devices[index]
             if (root.isSink) {
                 Audio.setDefaultSink(item)
