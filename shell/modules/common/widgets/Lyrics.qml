@@ -35,18 +35,23 @@ Item {
                 anchors.centerIn: parent
                 spacing: 12
 
-                Item {
+                // Loading gaya macOS (spinner jari-jari). Bila lirik tidak ada: teks kecil, klik = coba lagi.
+                MacSpinner {
                     Layout.alignment: Qt.AlignHCenter
-                    implicitWidth: 48
-                    implicitHeight: 48
+                    visible: LyricsService.status === "loading"
+                    running: visible
+                    size: 28
+                    color: root.textColor
+                }
 
-                    MaterialLoadingIndicator {
-                        anchors.fill: parent
-                        loading: LyricsService.status === "loading"
-                        colBg: root.indicatorColor
-                        colShape: root.indicatorShapeColor
-                        implicitSize: 48
-                    }
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    visible: LyricsService.status !== "loading"
+                    horizontalAlignment: Text.AlignHCenter
+                    color: root.dimColor
+                    font.pixelSize: Appearance.font.pixelSize.small * root.fontScale
+                    text: (LyricsService.status === "no_info" ? "Info lagu tidak tersedia" : "Lirik tidak ditemukan")
+                        + "  ·  klik untuk coba lagi"
 
                     MouseArea {
                         anchors.fill: parent
