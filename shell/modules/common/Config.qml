@@ -252,6 +252,8 @@ Singleton {
 
             property JsonObject background: JsonObject {
                 property string lockWall: ""
+                // Wallpaper layar login SDDM ("" = ikut wallpaper desktop). Diterapkan oleh sddm-latar-sync.
+                property string loginWall: ""
                 property bool widgetsLocked: false
                 property bool spanWallpaper: false // satu wallpaper menyambung ke semua layar (ala Windows Span)
                 property JsonObject collage: JsonObject {

@@ -6,7 +6,9 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
 import Quickshell
+import Quickshell.Io
 import Quickshell.Hyprland
+import Qt5Compat.GraphicalEffects
 
 
 ContentPage {
@@ -406,6 +408,111 @@ ContentPage {
                         }
                     }
                 }
+            }
+        }
+
+        // Layar login SDDM: wallpaper/live wallpaper terpisah dari desktop. Hanya tampil bila
+        // sddm-latar-sync terpasang (tema SDDM membaca latar dari /var/lib/sddm-latar).
+        ContentSection {
+            id: loginSection
+            icon: "login"
+            title: "Layar login (SDDM)"
+            visible: loginSection.syncInstalled
+
+            property bool syncInstalled: false
+            readonly property string previewPath: "/var/lib/sddm-latar/background.jpg"
+            readonly property bool followDesktop: Config.options.background.loginWall === ""
+
+            Process {
+                running: true
+                command: ["sh", "-c", "test -x \"$HOME/.local/bin/sddm-latar-sync\""]
+                onExited: (code) => loginSection.syncInstalled = code === 0
+            }
+            // Grid pemilih wallpaper hanya memuat gambar; untuk login dipakai jendela file
+            // (kdialog, sama dengan pemilih live wallpaper desktop) yang juga menerima video.
+            Process {
+                id: loginPicker
+                command: ["sh", "-c", "d=\"$HOME/Pictures/Wallpapers\"; [ -d \"$d\" ] || d=\"$HOME\"; "
+                    + "kdialog --title 'Pilih wallpaper layar login' --getopenfilename \"$d\" "
+                    + "'Gambar & video (*.jpg *.jpeg *.png *.webp *.avif *.bmp *.mp4 *.webm *.mkv *.mov)'"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        const path = text.trim()
+                        if (path !== "") Config.options.background.loginWall = path
+                    }
+                }
+            }
+            // sddm-latar-sync jalan ±8 dtk setelah config berubah; muat ulang pratinjau sesudahnya
+            Connections {
+                target: Config.options.background
+                function onLoginWallChanged() { reloadPreview.restart() }
+                function onWallpaperPathChanged() { reloadPreview.restart() }
+            }
+            Timer {
+                id: reloadPreview
+                interval: 14000
+                onTriggered: { loginPreview.source = ""; loginPreview.source = "file://" + loginSection.previewPath }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: width * 9 / 16
+                radius: Appearance.rounding.verylarge
+                color: Appearance.colors.colLayer1
+                clip: true
+
+                Image {
+                    id: loginPreview
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    source: "file://" + loginSection.previewPath
+                    cache: false
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: 960
+                    layer.enabled: true
+                    layer.effect: OpacityMask {
+                        maskSource: Rectangle {
+                            width: loginPreview.width; height: loginPreview.height
+                            radius: Appearance.rounding.large
+                        }
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: loginPicker.running = true
+                }
+            }
+
+            GroupedList {
+                Layout.topMargin: -2
+
+                ConfigSwitch {
+                    buttonIcon: "sync"
+                    text: "Ikuti wallpaper desktop"
+                    checked: loginSection.followDesktop
+                    onCheckedChanged: {
+                        if (checked === loginSection.followDesktop) return;
+                        if (checked) {
+                            Config.options.background.loginWall = "";
+                        } else {
+                            loginPicker.running = true
+                            checked = Qt.binding(() => loginSection.followDesktop)
+                        }
+                    }
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                Layout.leftMargin: 8
+                wrapMode: Text.Wrap
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colSubtext
+                text: (loginSection.followDesktop ? "Login ikut wallpaper desktop. "
+                        : "Login memakai: " + Config.options.background.loginWall.split("/").pop() + ". ")
+                    + "Klik gambar untuk memilih gambar atau live wallpaper (mp4) khusus login. Berlaku saat login berikutnya."
             }
         }
 

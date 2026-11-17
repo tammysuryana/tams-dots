@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.UPower
 import qs
 import qs.services
 import qs.modules.common
@@ -21,6 +22,9 @@ AbstractBackgroundWidget {
     property real cardWidth: (widgetWidth - cardSpacing * 2) / 3
     property bool isVertical: root.configEntry.vertical ?? false
     property bool hasBattery: Battery.available
+    // Status pengisian: tercolok = tidak jalan dari baterai (termasuk sudah penuh)
+    readonly property bool batteryCharging: root.hasBattery && Battery.isCharging
+    readonly property bool batteryPlugged: root.hasBattery && (Battery.isPluggedIn || !UPower.onBattery)
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -73,6 +77,8 @@ AbstractBackgroundWidget {
                 font.pixelSize: Appearance.font.pixelSize.small
                 color: Appearance.colors.colOnPrimaryContainer
                 opacity: 0.6
+                elide: Text.ElideRight
+                Layout.fillWidth: true
             }
         }
     }
@@ -102,11 +108,13 @@ AbstractBackgroundWidget {
             shapeColor: Appearance.colors.colSecondary
         }
         StatCard {
-            icon: root.hasBattery ? "battery_full" : "storage"
+            icon: !root.hasBattery ? "storage" : root.batteryCharging ? "bolt" : "battery_full"
             value: root.hasBattery
                 ? Math.round(Battery.percentage * 100) + "%"
                 : Math.round(ResourceUsage.diskUsedPercentage * 100) + "%"
-            label: root.hasBattery ? "Battery" : "Disk"
+            label: !root.hasBattery ? "Disk"
+                : root.batteryCharging ? "Battery · Charging"
+                : root.batteryPlugged ? "Battery · Plugged in" : "Battery · On battery"
             shape: MaterialShape.Shape.Cookie12Sided
             bgColor: Appearance.colors.colTertiaryContainer
             shapeColor: Appearance.colors.colTertiary
