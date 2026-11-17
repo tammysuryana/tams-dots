@@ -451,7 +451,10 @@ ContentPage {
             Timer {
                 id: reloadPreview
                 interval: 14000
-                onTriggered: { loginPreview.source = ""; loginPreview.source = "file://" + loginSection.previewPath }
+                onTriggered: {
+                    if (!loginSection.syncInstalled) return
+                    loginPreview.source = ""; loginPreview.source = "file://" + loginSection.previewPath
+                }
             }
 
             Rectangle {
@@ -465,7 +468,7 @@ ContentPage {
                     id: loginPreview
                     anchors.fill: parent
                     anchors.margins: 8
-                    source: "file://" + loginSection.previewPath
+                    source: loginSection.syncInstalled ? "file://" + loginSection.previewPath : ""
                     cache: false
                     asynchronous: true
                     fillMode: Image.PreserveAspectCrop
