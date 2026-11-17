@@ -2,6 +2,8 @@ import QtQuick
 
 // Indikator loading gaya macOS: 12 jari-jari membulat tanpa latar, berputar searah jarum jam
 // per langkah (satu putaran per detik), jari-jari terdepan paling terang dan ekornya memudar.
+// revealed (0..1): saat tidak berputar, jari-jari muncul satu per satu searah jarum jam
+// (gaya tarik-untuk-muat-ulang macOS/iOS). 1 = semua tampak.
 Item {
     id: root
 
@@ -9,6 +11,7 @@ Item {
     property color color: "white"
     property int spokes: 12
     property real size: 28
+    property real revealed: 1
 
     implicitWidth: size
     implicitHeight: size
@@ -39,7 +42,8 @@ Item {
                 color: root.color
                 // umur = berapa langkah sejak jari-jari ini paling terang
                 readonly property int age: (root.step - spoke.index + root.spokes) % root.spokes
-                opacity: root.running ? Math.max(0.15, 1 - age / root.spokes) : 0.3
+                opacity: root.running ? Math.max(0.15, 1 - age / root.spokes)
+                    : (spoke.index < Math.round(root.revealed * root.spokes) ? 0.45 : 0)
             }
         }
     }
