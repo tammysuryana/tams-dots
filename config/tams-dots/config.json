@@ -69,7 +69,7 @@
   },
   "audio": {
     "protection": {
-      "enable": true,
+      "enable": false,
       "maxAllowed": 99,
       "maxAllowedIncrease": 10
     }
